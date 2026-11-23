@@ -45,6 +45,7 @@ p{margin:.5em 0}.mut{color:var(--mut)}.small{font-size:13px}
 .hero .wm{font-size:clamp(26px,6vw,38px)}.hero svg.logo{width:min(250px,62%);height:auto;display:block}.hero small{color:var(--brand);font-weight:700;font-size:13px;text-align:right}
 #s-title{align-items:flex-end;background:linear-gradient(180deg,transparent 40%,rgba(0,20,15,.7))}
 #s-title .card{margin:0;max-width:520px}
+.help{max-width:620px}.help h3{margin-top:16px}.steps{margin:6px 0 4px;padding-left:22px;display:grid;gap:4px}.ctl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px}.ctl b{color:var(--y)}
 .how{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px;margin-top:12px}.how b{color:var(--y)}
 /* phone hub */
 #s-phone{padding:0;background:none;pointer-events:none;justify-content:flex-end;align-items:stretch}
@@ -71,6 +72,8 @@ p{margin:.5em 0}.mut{color:var(--mut)}.small{font-size:13px}
 .who.on{border-color:var(--y);background:rgba(255,194,26,.12)}.who.add{border-style:dashed}
 #who-f{display:flex;gap:8px;margin-top:8px}#who-f input{flex:1;min-width:0;border-radius:10px;border:1px solid var(--line);background:#0e1d18;color:#fff;padding:10px 12px;font-size:16px}
 #who-n.need{border-color:var(--y);animation:shake .35s}@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.fix{display:grid;grid-template-columns:56px 1fr;gap:6px 10px;align-items:center;background:#fff;color:#17201a;border-radius:14px;padding:12px;margin-top:10px}.fix svg{width:56px;height:42px}.fix small{display:block;color:#56645a;font-size:12px}.fix .btn{grid-column:1/-1;display:grid;justify-items:center;line-height:1.15}.fix .btn small{color:inherit;opacity:.8;font-weight:600}
+.more{margin-top:12px}.more summary{cursor:pointer;font-weight:700;color:var(--mut);padding:6px 0}
 .barbox{display:grid;gap:4px;background:rgba(224,167,42,.12);border:1px solid rgba(224,167,42,.4);border-radius:14px;padding:10px 12px;margin:12px 0}.barbox .row{margin-top:4px}
 .adban{display:block;margin:0 0 12px;border-radius:12px;overflow:hidden;line-height:0}.adban img{width:100%;height:auto;display:block}
 .rq{font-size:12px;font-weight:700;background:rgba(223,230,228,.1);border-radius:999px;padding:3px 9px;white-space:nowrap}
@@ -145,7 +148,7 @@ form.mail input{flex:1 1 200px;font:inherit;font-size:16px;padding:10px 12px;bor
 #pad{position:absolute;left:0;bottom:0;width:52%;height:55%;pointer-events:auto;touch-action:none}
 #joy{position:absolute;width:130px;height:130px;margin:-65px 0 0 -65px;border-radius:50%;background:rgba(0,40,31,.45);border:2px solid rgba(255,255,255,.35);display:none}
 #knob{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px;border-radius:50%;background:var(--y);box-shadow:0 3px 10px rgba(0,0,0,.4)}
-.touch #joy{display:block}
+.touch #joy,#joy.live{display:block}
 .acts{position:absolute;right:max(12px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:auto}
 .acts>button{border-radius:999px;font-weight:900;font-size:15px;padding:0 18px;min-width:104px;min-height:52px;background:var(--panel);border:2px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
 .acts small{font-size:11px;color:var(--mut)}
@@ -153,6 +156,9 @@ form.mail input{flex:1 1 200px;font:inherit;font-size:16px;padding:10px 12px;bor
 #b-key.crank{animation:blink .2s infinite alternate}
 #b-blades.on{background:var(--y);color:#1b1404;border-color:#fff}#b-blades.on small{color:#3b2c00}
 #b-shed{background:var(--r);border-color:#ffb3a5}
+#b-shed.alert{animation:pulse .8s infinite alternate}@keyframes pulse{to{box-shadow:0 0 0 8px rgba(255,194,26,.75);transform:scale(1.06)}}
+#fixme{position:absolute;left:50%;transform:translateX(-50%);top:calc(max(10px,env(safe-area-inset-top)) + 96px);pointer-events:auto;display:grid;gap:2px;background:var(--r);color:#fff;border:2px solid #ffd2c8;border-radius:14px;padding:8px 16px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.35);animation:glow .8s infinite alternate}@keyframes glow{to{box-shadow:0 0 0 6px rgba(255,194,26,.8)}}
+#fixme[hidden]{display:none}#fixme b{font-size:15px}#fixme span{font-size:12px;opacity:.9}
 #b-drink{background:#1f6fb2;border-color:#9fd3ff}
 #b-trim{background:#5b4a8a;border-color:#c7b8ff}
 .season{background:var(--mint);color:var(--brand);border-radius:14px;padding:10px 12px;margin-top:6px}
@@ -181,7 +187,9 @@ form.mail input{flex:1 1 200px;font:inherit;font-size:16px;padding:10px 12px;bor
  #req{max-width:calc(100% - 20px);top:auto;bottom:calc(max(16px,env(safe-area-inset-bottom)) + 330px);left:auto;right:10px;transform:none;flex-direction:column;align-items:flex-end}
  .acts>button{min-width:92px;min-height:48px;font-size:14px}}
 @media(min-width:701px){.phone{height:calc(100% - 24px)}}
-@media(prefers-reduced-motion:reduce){.pc.ok,.pc.no,.m.warn,#b-key.crank{animation:none}#pop.on{animation-duration:.01s}}
+.icon .sm{display:none}
+@media(max-width:700px){.icon .lg{display:none}.icon .sm{display:inline}#hud .top{gap:6px}#fixme{top:auto;left:10px;transform:none;bottom:calc(max(16px,env(safe-area-inset-bottom)) + 250px);max-width:200px;padding:8px 12px}}
+@media(prefers-reduced-motion:reduce){#fixme,#b-shed.alert{animation:none}.pc.ok,.pc.no,.m.warn,#b-key.crank{animation:none}#pop.on{animation-duration:.01s}}
 </style>
 </head>
 <body>
@@ -195,10 +203,12 @@ form.mail input{flex:1 1 200px;font:inherit;font-size:16px;padding:10px 12px;bor
     <div class="pill time" id="h-time">2:30</div>
     <div class="pill">Cut <div class="bar"><i id="h-covbar"></i></div><b id="h-cov">0%</b></div>
     <button class="icon" id="b-view" aria-label="Switch camera">Cam</button>
-    <button class="icon" id="b-radio" aria-label="Radio">Radio</button>
+    <button class="icon" id="b-radio" aria-label="Radio"><span class="lg">Radio</span><span class="sm">♪</span></button>
+    <button class="icon" id="b-help" aria-label="How to play">?</button>
     <button class="icon" id="b-pause" aria-label="Pause">II</button>
   </div>
   <div id="req"></div>
+  <button id="fixme" hidden></button>
   <div class="meters">
     <div class="m" id="mb"><label>Blades <span id="t-blade">Sharp</span></label><div class="bar"><i id="m-blade"></i></div></div>
     <div class="m" id="mt"><label>Deck belt <span id="t-belt">OK</span></label><div class="bar"><i id="m-belt"></i></div></div>
@@ -235,10 +245,11 @@ form.mail input{flex:1 1 200px;font:inherit;font-size:16px;padding:10px 12px;bor
     <div class="row">
       <button class="btn" id="b-play">Start career</button>
       <button class="btn ghost" id="b-new" hidden>New career</button>
+      <button class="btn ghost" id="b-howto">How to play</button>
       <button class="btn ghost" id="b-mute1">Sound on</button>
     </div>
     <div class="how small mut">
-      <b>Drive</b><span>W A S D or arrows, or the left thumb pad. C switches seat, chase and top view</span>
+      <b>Drive</b><span>W A S D or arrows, the left thumb pad, or drag / two-finger swipe on a touchpad. C switches the camera</span>
       <b>Mow</b><span>Turn the key, set the deck height the client asked for, then blades on</span>
       <b>Fix</b><span>Belts snap and blades dull. Keep spares that fit your mower, or pay for a rush order</span>
     </div>
@@ -272,9 +283,41 @@ form.mail input{flex:1 1 200px;font:inherit;font-size:16px;padding:10px 12px;bor
 <section class="screen" id="s-pause">
   <div class="card">
     <h2>Paused</h2>
-    <div class="row"><button class="btn" id="b-resume">Resume</button><button class="btn ghost" id="b-end">Call the client now</button><button class="btn ghost" id="b-mute2">Sound on</button><button class="btn ghost" id="b-quit">Abandon job</button></div>
+    <div class="row"><button class="btn" id="b-resume">Resume</button><button class="btn ghost" id="b-help2">How to play</button><button class="btn ghost" id="b-end">Call the client now</button><button class="btn ghost" id="b-mute2">Sound on</button><button class="btn ghost" id="b-quit">Abandon job</button></div>
     <p class="small mut">Abandoning costs 2 reputation and the day.</p>
     <p class="small"><a class="fb" href="#" target="_blank" rel="noopener">Report a bug / leave feedback</a></p>
+  </div>
+</section>
+
+<section class="screen" id="s-help">
+  <div class="card help">
+    <div class="brand"><span class="badge">UDC PARTS</span> How to play</div>
+    <h2>Mow Pro in one minute</h2>
+    <p class="mut">Mow the client's lawn before the timer runs out. Good, even work at the right height earns stars, cash and reputation. Reputation unlocks bigger jobs: farms, parks, estates, the golf club and the stadium.</p>
+    <h3>Start a job in 3 taps</h3>
+    <ol class="steps"><li><b>Key</b> starts the engine</li><li><b>▲ ▼</b> set the deck to the height the client wants (shown under the timer)</li><li><b>Blades</b> on, then drive in long straight lines that overlap a little</li></ol>
+    <p class="small mut">Done? Tap <b>Finish job</b>. Fences and flower beds leave edges the mower can't reach: hop off with <b>Trimmer</b> and walk them.</p>
+    <h3>Driving</h3>
+    <div class="ctl">
+      <b>Keyboard</b><span>W A S D or arrows</span>
+      <b>Phone</b><span>left thumb pad</span>
+      <b>Touchpad / mouse</b><span>press and drag anywhere on the lawn, like a joystick. Or swipe with two fingers: up = forward, down = back, left / right = steer</span>
+    </div>
+    <p class="small"><button class="btn ghost sm" id="b-winv"></button></p>
+    <h3>When something breaks</h3>
+    <p>Watch the <b>Blades</b> and <b>Deck belt</b> bars on the left. When one runs low or the belt snaps, a red banner and the <b>Shed</b> button start blinking.</p>
+    <ol class="steps"><li>Tap the banner or <b>Shed</b></li><li>The part that fits your mower is right on top</li><li>Tap <b>Install</b> (if you have a spare) or <b>Order by UDC van</b> (double price, arrives in about 8 seconds)</li></ol>
+    <p class="small mut">Save money: buy spare belts and blades between jobs in the phone, <b>UDC Store</b>. <b>Find my part</b> shows what fits each mower.</p>
+    <h3>Also good to know</h3>
+    <ul class="steps">
+      <li><b>Hydration</b>: thirst makes steering wobble. Tap <b>Drink</b>: water, cola (speed), iced tea (steady hands)</li>
+      <li><b>Camera</b>: switch between seat, chase and top view</li>
+      <li><b>Geese</b> run from a loud mower. You can't hurt them</li>
+      <li>Between jobs the phone has <b>Jobs</b>, <b>UDC Store</b>, <b>Garage</b> (mowers, paint) and <b>Profile</b></li>
+    </ul>
+    <h3>All keys</h3>
+    <p class="small mut">K key · Space blades · R / F deck up / down · T trimmer · Q drink (1–3) · E shed · C camera · M radio · Esc pause</p>
+    <div class="row"><button class="btn" id="b-helpx">Got it</button></div>
   </div>
 </section>
 
@@ -747,7 +790,7 @@ function renderPhone(){const ti=tierIx(),nt=TIERS[ti+1],se=SEASONS[sIx()];
   <h3 style="margin-top:14px">Reputation</h3>${TIERS.map((t,i)=>`<div class="tier"><span>${i<=ti?'✓':'·'}</span><span>${t.n}</span><span class="${i<=ti?'':'lk'}">${t.rep} rep</span></div>`).join('')}
   <h3 style="margin-top:14px">Radio</h3><div class="chips">${['Off',...STATIONS.map(s=>s.n)].map((n,i)=>`<button class="chip${MUS.on===i-1?' on':''}" data-st="${i-1}">${n}</button>`).join('')}</div>
   <p class="small mut">All music is generated live by the game's own code, so there are no third-party rights.</p>
-  <div class="row"><button class="btn ghost sm" id="b-mute3">${muted?'Sound off':'Sound on'}</button><button class="btn ghost sm" id="b-reset">Start over</button><button class="btn ghost sm" id="b-switch">Switch player</button></div>`;}
+  <div class="row"><button class="btn ghost sm" id="b-mute3">${muted?'Sound off':'Sound on'}</button><button class="btn ghost sm" id="b-reset">Start over</button><button class="btn ghost sm" id="b-switch">Switch player</button><button class="btn ghost sm" id="b-help3">How to play</button></div>`;}
 }
 $('#tabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(!b)return;tab=b.dataset.tab;renderPhone();$('#ph-body').scrollTop=0;};
 $('#ph-body').onchange=e=>{if(e.target.id==='pf'){SV.pf=e.target.value;save();renderPhone();}};
@@ -768,6 +811,7 @@ $('#ph-body').onclick=e=>{const t=e.target.closest('button');if(!t)return;const 
  if(d.use){SV.active=d.use;save();buildMower(AM(),paintOf(d.use));parkMower();renderPhone();return;}
  if(d.bm){const x=MW_[d.bm];if(SV.cash<x.price)return;SV.cash-=x.price;SV.owned.push(x.id);SV.active=x.id;cond(x.id);save();sfx('ding');buildMower(x,paintOf(x.id));parkMower();renderPhone();return;}
  if(t.id==='b-mute3'){audioInit();setMute(!muted);renderPhone();return;}
+ if(t.id==='b-help3'){openHelp();return;}
  if(t.id==='b-switch'){state='title';renderWho();show('s-title');return;}
  if(t.id==='b-reset'){if(t.dataset.sure){SV=fresh();save();genOffers();tab='jobs';buildMower(AM(),paintOf(SV.active));parkMower();renderPhone();}else{t.dataset.sure=1;t.textContent='Tap again to erase';}}};
 
@@ -804,12 +848,18 @@ function symptom(){if(G.snap)return null;if(G.vib&&G.sharp<75)return{k:'blades',
 function openShed(){if(state!=='play')return;if(G.foot){toast('Hop back on the mower first (T).','bad');return;}state='pit';renderShed();show('s-pit');}
 function renderShed(){const m=AM(),need=[];if(G.snap||G.belt<60)need.push('belt');if(G.sharp<60||G.vib)need.push('blades');const sy=symptom();
  if(sy&&!G.diag[sy.k]){$('#pit-title').textContent='Diagnose it';$('#pit-msg').textContent=sy.t+' What is causing it?';
-  $('#pit-body').innerHTML=`<div class="parts">${[['belt','Worn deck belt'],['blades','Bent or dull blades'],['height','Deck set too low'],['gas','Running out of gas']].map(([k,l])=>`<button class="pc dg" data-dg="${k}" data-want="${sy.k}"><span><b>${l}</b></span></button>`).join('')}</div><p class="small mut">Right first time: +$15. A wrong guess costs 5 seconds.</p>`;return;}
+  $('#pit-body').innerHTML=`<div class="parts">${[['belt','Worn deck belt'],['blades','Bent or dull blades'],['height','Deck set too low'],['gas','Running out of gas']].map(([k,l])=>`<button class="pc dg" data-dg="${k}" data-want="${sy.k}"><span><b>${l}</b></span></button>`).join('')}</div><p class="small mut">Right first time: +$15. A wrong guess costs 5 seconds. Hint: squeal = belt; torn grass or shaking = blades.</p>`;return;}
  $('#pit-title').textContent=need.length?need.map(k=>k==='belt'?(G.snap?'Snapped belt':'Worn belt'):'Blades').join(' + '):'Shed';
- $('#pit-msg').textContent=need.length?'Pick a part that fits your '+mname(m)+'. Wrong part costs 10 seconds.':'Belt and blades look fine. You can still swap or grab gas.';
+ $('#pit-msg').textContent=need.length?'Here is the part that fits your '+mname(m)+'. One tap and you are back to mowing.':'Belt and blades look fine. You can still swap parts or grab gas.';
+ let quick='';for(const k of need){const fit=m[k].filter(pn=>P[pn]),sp=fit.find(pn=>SV.inv[pn]>0),p=P[sp||fit[0]];if(!p)continue;
+  quick+=`<div class="fix">${icon(p)}<span><b>${k==='belt'?(G.snap?'Replace the snapped deck belt':'Replace the worn deck belt'):'Put on sharp blades'}</b><small>Fits your mower: <b>${p.pn}</b> ${p.name}</small></span>`+
+   (sp?`<button class="btn" data-pn="${p.pn}" data-src="inv">Install from your shed<small>free · you have ×${SV.inv[p.pn]}</small></button>`
+      :`<button class="btn" data-pn="${p.pn}" data-src="rush" ${SV.cash<p.price*2||G.van?'disabled':''}>${G.van?'Van already on its way':'Order by UDC van'}<small>${money(p.price*2)} · arrives in ~8 s</small></button>`)+`</div>`;}
+ if(quick)quick+=`<p class="small mut">Tip: buy spares between jobs in UDC Store, then a fix here is free and instant.</p>`;
  const spares=Object.keys(SV.inv).filter(pn=>SV.inv[pn]>0),kinds=need.length?need:['belt','blades'];
- let h=`<h3 style="margin-top:8px">Your spares</h3>`+(spares.length?`<div class="parts">${spares.map(pn=>partCard(P[pn],'pick').replace('<button class="pc"',`<button class="pc" data-src="inv"`).replace('</span></button>',`<small>In shed: ×${SV.inv[pn]}</small></span></button>`)).join('')}</div>`:'<p class="small mut">No spares in the shed. Next time, stock up in the UDC Store.</p>');
+ let h=quick+(quick?'<details class="more"><summary>Other parts and options</summary>':'')+`<h3 style="margin-top:8px">Your spares</h3>`+(spares.length?`<div class="parts">${spares.map(pn=>partCard(P[pn],'pick').replace('<button class="pc"',`<button class="pc" data-src="inv"`).replace('</span></button>',`<small>In shed: ×${SV.inv[pn]}</small></span></button>`)).join('')}</div>`:'<p class="small mut">No spares in the shed. Next time, stock up in the UDC Store.</p>');
  h+=`<h3 style="margin-top:14px">Rush delivery by UDC van</h3><p class="small mut">${G.van?'The van is already on its way.':'Double price. You keep mowing while the van drives over (about 8 seconds).'} You have ${money(SV.cash)}.</p><div class="parts">${PRODUCTS.map(p=>P[p[0]]).filter(p=>kinds.includes(p.kind)).map(p=>partCard(p,'pick').replace('<button class="pc"',`<button class="pc" data-src="rush" ${SV.cash<p.price*2||G.van?'disabled':''}`).replace('</span></button>',`<small><b>${money(p.price*2)}</b></small></span></button>`)).join('')}</div>`;
+ if(quick)h+='</details>';
  h+=`<div class="row"><button class="btn ghost" id="b-gas" ${G.fuel>80||SV.cash<8?'disabled':''}>Gas can, $8 (+60% fuel)</button></div>`;
  $('#pit-body').innerHTML=h;}
 function installPart(p,via){const m=AM(),c=cond(m.id);if(p.kind==='belt'){G.belt=100;G.snap=false;G.warnB=false;c.beltPn=p.pn;}else{G.sharp=100;G.warnD=false;G.vib=false;c.bladePn=p.pn;}
@@ -936,9 +986,19 @@ addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
 const padEl=$('#pad'),joyEl=$('#joy'),knob=$('#knob');
 if(matchMedia('(pointer:coarse)').matches)$('#app').classList.add('touch');
 function joyHome(){const r=padEl.getBoundingClientRect();joyEl.style.left='96px';joyEl.style.top=(r.height-96)+'px';knob.style.transform='';}
-padEl.addEventListener('pointerdown',e=>{$('#app').classList.add('touch');joy.id=e.pointerId;padEl.setPointerCapture(e.pointerId);const r=padEl.getBoundingClientRect();joy.cx=e.clientX-r.left;joy.cy=e.clientY-r.top;joyEl.style.left=joy.cx+'px';joyEl.style.top=joy.cy+'px';joy.x=joy.y=0;});
+function joyStart(e,el){joy.id=e.pointerId;el.setPointerCapture(e.pointerId);const r=padEl.getBoundingClientRect();joy.cx=e.clientX-r.left;joy.cy=e.clientY-r.top;joyEl.style.left=joy.cx+'px';joyEl.style.top=joy.cy+'px';joyEl.classList.add('live');joy.x=joy.y=0;}
+padEl.addEventListener('pointerdown',e=>{$('#app').classList.add('touch');joyStart(e,padEl);});
+// Mouse or touchpad: press and drag anywhere on the field to drive (the stick appears where you press)
+$('#c').addEventListener('pointerdown',e=>{if(state!=='play'||e.pointerType==='touch')return;joyStart(e,$('#c'));});
+$('#c').addEventListener('pointermove',e=>{if(e.pointerId!==joy.id)return;const r=padEl.getBoundingClientRect();let dx=e.clientX-r.left-joy.cx,dy=e.clientY-r.top-joy.cy;const d=Math.hypot(dx,dy),m=55;if(d>m){dx*=m/d;dy*=m/d;}knob.style.transform=`translate(${dx}px,${dy}px)`;joy.x=dx/m;joy.y=dy/m;});
+['pointerup','pointercancel'].forEach(t=>$('#c').addEventListener(t,e=>{if(e.pointerId!==joy.id)return;joy.id=null;joy.x=joy.y=0;knob.style.transform='';joyEl.classList.remove('live');}));
+// Two-finger swipe on a touchpad: swipe up to drive forward, left/right to steer. Eases off when the fingers stop.
+const wj={x:0,y:0,t:0};let wInv=ls.get('wInv',false);
+addEventListener('wheel',e=>{if(state!=='play')return;e.preventDefault();if(e.ctrlKey)return;const k=e.deltaMode===1?.12:.012,sg=wInv?-1:1;
+ wj.y=Math.max(-1,Math.min(1,wj.y-e.deltaY*k*sg));wj.x=Math.max(-1,Math.min(1,wj.x-e.deltaX*k*sg));wj.t=.18;},{passive:false});
+function wheelTick(dt){if(wj.t>0){wj.t-=dt;return;}const f=Math.exp(-dt*6);wj.x*=f;wj.y*=f;if(Math.abs(wj.x)<.02)wj.x=0;if(Math.abs(wj.y)<.02)wj.y=0;}
 padEl.addEventListener('pointermove',e=>{if(e.pointerId!==joy.id)return;const r=padEl.getBoundingClientRect();let dx=e.clientX-r.left-joy.cx,dy=e.clientY-r.top-joy.cy;const d=Math.hypot(dx,dy),m=55;if(d>m){dx*=m/d;dy*=m/d;}knob.style.transform=`translate(${dx}px,${dy}px)`;joy.x=dx/m;joy.y=dy/m;});
-const joyUp=e=>{if(e.pointerId!==joy.id)return;joy.id=null;joy.x=joy.y=0;joyHome();};
+const joyUp=e=>{joyEl.classList.remove('live');if(e.pointerId!==joy.id)return;joy.id=null;joy.x=joy.y=0;joyHome();};
 padEl.addEventListener('pointerup',joyUp);padEl.addEventListener('pointercancel',joyUp);
 let drag=null;$('#c').addEventListener('pointerdown',e=>{if(state==='phone')drag=e.clientX;});
 addEventListener('pointermove',e=>{if(drag!==null&&state==='phone'){mower.rotation.y+=(e.clientX-drag)*.012;drag=e.clientX;}});addEventListener('pointerup',()=>drag=null);
@@ -946,7 +1006,7 @@ function pause(){if(state!=='play')return;state='pause';show('s-pause');}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
 const blurClick=(id,fn)=>$(id).onclick=e=>{e.currentTarget.blur();fn();};
 function radioCycle(){audioInit();radioSet(MUS.on>=STATIONS.length-1?-1:MUS.on+1);if(MUS.on<0)toast('Radio off');}
-$('#bubble').onclick=endIntro;padEl.addEventListener('pointerdown',()=>{if(state==='play'&&G.intro>0)endIntro();},true);
+$('#fixme').onclick=e=>{e.currentTarget.blur();openShed();};$('#bubble').onclick=endIntro;padEl.addEventListener('pointerdown',()=>{if(state==='play'&&G.intro>0)endIntro();},true);
 blurClick('#b-key',keyTurn);blurClick('#b-trim',toggleTrim);blurClick('#b-radio',radioCycle);blurClick('#b-drink',toggleDrinks);$('#drinkbar').onclick=e=>{const b=e.target.closest('[data-dr]');if(b&&!b.disabled){b.blur();drink(b.dataset.dr);}};blurClick('#b-blades',toggleBlades);blurClick('#b-shed',openShed);blurClick('#h-up',()=>setHeight(1));blurClick('#h-dn',()=>setHeight(-1));blurClick('#b-view',cycleView);
 $('#b-finish').onclick=()=>finish(false);$('#b-pause').onclick=pause;
 $('#b-resume').onclick=()=>{state='play';show(null);};$('#b-end').onclick=()=>{state='play';finish(false);};$('#b-quit').onclick=()=>{state='play';finish(true);};
@@ -964,10 +1024,17 @@ function pickPlayer(id){CUR=id;ls.set('cur',CUR);SV=loadCareer();renderWho();if(
 $('#who').onclick=e=>{const t=e.target.closest('[data-pid]');if(!t)return;
  if(t.dataset.pid==='+'){$('#who-f').hidden=false;$('#who-n').focus();return;}pickPlayer(t.dataset.pid);};
 function nameNeeded(){const f=$('#who-f'),i=$('#who-n');if(f.hidden)f.hidden=false;i.classList.remove('need');void i.offsetWidth;i.classList.add('need');i.focus();}
-function play(){if(!curPlayer()){nameNeeded();return;}audioInit();if(!SV){SV=fresh();save();}openPhone('jobs');}
+function play(){if(!curPlayer()){nameNeeded();return;}audioInit();const first=!SV;if(!SV){SV=fresh();save();}openPhone('jobs');if(first)openHelp();}
 $('#who').onsubmit=e=>{e.preventDefault();const first=!PLAYERS.length,p=addPlayer($('#who-n').value);if(!p){nameNeeded();return;}pickPlayer(p.id);if(first)play();};
 $('#b-play').onclick=()=>{const i=$('#who-n'),f=$('#who-f');if(i&&f&&!f.hidden){if(!cleanName(i.value)){nameNeeded();return;}pickPlayer(addPlayer(i.value).id);}play();};
 $('#b-new').onclick=()=>{if($('#b-new').dataset.sure){SV=fresh();save();audioInit();openPhone('jobs');}else{$('#b-new').dataset.sure=1;$('#b-new').textContent='Tap again to erase this career';}};
+// How to play: opens from the title, the HUD (?), pause and Profile; the game waits while it's open
+let helpBack=null;
+function openHelp(){const scr=$$('.screen').find(x=>x.classList.contains('on'));helpBack={state,scr:scr?scr.id:null};if(state==='play')state='pause';$('#b-winv').textContent=wInv?'Two-finger swipe feels reversed? Now: reversed. Tap to switch':'Two-finger swipe feels reversed? Tap to flip it';show('s-help');}
+function closeHelp(){const b=helpBack||{state:'title',scr:'s-title'};state=b.state;show(b.state==='play'?null:b.scr);helpBack=null;}
+$('#b-helpx').onclick=closeHelp;$('#b-howto').onclick=openHelp;$('#b-help2').onclick=()=>{state='play';show(null);openHelp();};
+blurClick('#b-help',()=>{if(state==='play')openHelp();});
+$('#b-winv').onclick=()=>{wInv=!wInv;ls.set('wInv',wInv);$('#b-winv').textContent=wInv?'Two-finger swipe feels reversed? Now: reversed. Tap to switch':'Two-finger swipe feels reversed? Tap to flip it';};
 renderWho();
 
 // ---------- simulation ----------
@@ -1024,11 +1091,11 @@ function vanStep(dt){const V=G.van;if(!V)return;V.t+=dt;const k=Math.min(1,V.t/6
  if(V&&V.t>.1&&V.t<.2&&!V.hint){V.hint=1;}}
 function endIntro(){if(G.intro>0){G.intro=0;$('#bubble').hidden=true;placeCam(true);}}
 function step(dt){
- const dk=DECKS[AM().deck];updGeese(dt);
+ const dk=DECKS[AM().deck];updGeese(dt);wheelTick(dt);
  if(G.intro>0){G.intro-=dt;const c=clientFig.position,t=Math.min(1,(4.5-G.intro)/4.5);cam.position.set(c.x+.6-t*.4,1.55+t*.3,c.z+2.7+t*1.2);cam.lookAt(c.x,1.35,c.z);if(G.intro<=0)endIntro();return;}
  if(G.crank>0){G.crank-=dt;if(G.crank<=0){G.engine=true;$('#b-key').classList.remove('crank');toast(G.job.tut&&!G.tipK?'Engine running. Set the deck height, then BLADES (Space).':'Engine running.','good');G.tipK=1;hud();}}
  G.time-=dt;
- const inp={th:(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)-joy.y,sr:(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0)+joy.x};
+ const inp={th:Math.max(-1,Math.min(1,(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)-joy.y-wj.y)),sr:Math.max(-1,Math.min(1,(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0)+joy.x+wj.x))};
  G.thirst=Math.min(100,G.thirst+dt*.5*(THIRST[J.theme]||1)*(G.job.season===1?1.5:1)*(G.foot?1.2:G.engine?1:.6));if(G.rush>0)G.rush-=dt;if(G.calm>0)G.calm-=dt;
  if(G.thirst>70&&!(G.calm>0)&&(G.v>.3||G.foot))inp.sr+=Math.sin(uT.value*1.7)*.4*(G.thirst-70)/30;
  inp.th=Math.max(-1,Math.min(1,inp.th));inp.sr=Math.max(-1,Math.min(1,inp.sr));
@@ -1083,7 +1150,8 @@ function step(dt){
  if(++G.tick%4===0)hud(cov);if(G.tick%6===0)mini();
 }
 function meter(el,v){el.style.width=v+'%';el.className=v>60?'':v>30?'mid':'low';}
-function hud(cov){if(cov===undefined)cov=total?cutN/total*100:0;$('#h-time').textContent=fmt(G.time);$('#h-time').classList.toggle('low',G.time<20);$('#h-cov').textContent=Math.floor(cov)+'%';$('#h-covbar').style.width=cov+'%';
+function fixNeed(){if(G.foot)return null;if(G.snap)return 'Deck belt snapped';if(G.belt<25)return 'Deck belt is wearing out';if(G.sharp<25)return 'Blades are dull';if(G.fuel<12)return 'Almost out of gas';return null;}
+function hud(cov){if(cov===undefined)cov=total?cutN/total*100:0;{const n=fixNeed(),f=$('#fixme');f.hidden=!n;if(n)f.innerHTML=`<b>${n}</b><span>Tap here or SHED (E) to fix it</span>`;$('#b-shed').classList.toggle('alert',!!n);}$('#h-time').textContent=fmt(G.time);$('#h-time').classList.toggle('low',G.time<20);$('#h-cov').textContent=Math.floor(cov)+'%';$('#h-covbar').style.width=cov+'%';
  meter($('#m-blade'),G.sharp);meter($('#m-belt'),G.belt);meter($('#m-fuel'),G.fuel);$('#t-fuel').textContent=G.fuel>75?'Full':G.fuel>25?Math.round(G.fuel)+'%':'Low';
  meter($('#m-q'),100-G.thirst);$('#t-q').textContent=G.thirst<40?'Fresh':G.thirst<70?'OK':G.thirst<95?'Thirsty':'Parched';$('#mq').classList.toggle('warn',G.thirst>=70);$('#heat').style.opacity=Math.max(0,(G.thirst-60)/40).toFixed(2);
  $('#t-blade').textContent=G.vib?'Vibrating':G.sharp>60?'Sharp':G.sharp>G.dull?'Worn':'Dull';$('#t-belt').textContent=G.snap?'SNAPPED':G.belt>60?'OK':G.belt>25?'Worn':'Squealing';
