@@ -517,7 +517,7 @@ const cClip=new THREE.Color('#8fd14f'),cClip2=new THREE.Color('#c9b55a'),cSpark=
 // ---------- world ----------
 const zeroM=new THREE.Matrix4().makeScale(0,0,0);
 let edge=new Uint8Array(1),edgeTotal=0,leaves=null,leafCell=null,leafTotal=0,leafLeft=0,logoMask=null,bin=null,van=null,vanDriver=null,vanA,vanB,vanC,footFig=null;
-let fadeTrees=[],world=null,J=null,x0,z0,nx,nz,C=.35,st,hs,tufts,tx,tz,tr,inst,total,gcv,gx,gtex,obs=[],flag=null,fountain=null,clientFig=null;
+let geese=[],gooseHonk=0,fadeTrees=[],world=null,J=null,x0,z0,nx,nz,C=.35,st,hs,tufts,tx,tz,tr,inst,total,gcv,gx,gtex,obs=[],flag=null,fountain=null,clientFig=null;
 const PPM=12,cLight=new THREE.Color('#b4e872'),cDark=new THREE.Color('#7cbc48'),cRag=new THREE.Color('#c4ad4e');
 function disposeWorld(){if(!world)return;world.traverse(o=>{if(o.geometry&&o.geometry!==tuftGeo)o.geometry.dispose();if(o.material&&o.material!==tuftMat){if(o.material.map)o.material.map.dispose();o.material.dispose();}});S.remove(world);}
 function tree(x,z,s,pine){const before=world.children.length;mk(new THREE.CylinderGeometry(.12*s,.18*s,1.3*s,6),ph('#6b4a2f'),x,.65*s,z);
@@ -544,6 +544,42 @@ function photoBoard(x,z,ry,f){const g=new THREE.Group();g.position.set(x,0,z);g.
 function fenceBanner(x,z,ry,f,w,ar,y){const h=w/ar,g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;world.add(g);
  mk(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:bTex(f)}),0,y+h/2,0,g,false);mk(new THREE.BoxGeometry(w+.1,h+.1,.06),ph('#1f2422'),0,y+h/2,-.05,g);
  for(const sx of[-w/2,w/2])mk(new THREE.CylinderGeometry(.05,.05,y+h,6),ph('#5b605d'),sx,(y+h)/2,-.08,g);return g;}
+// ---------- geese: wander and graze, run and flap away from the mower; never hurt ----------
+const GOOSE={yard:[2,'canada'],farm:[5,'white'],park:[5,'canada'],estate:[3,'white'],golf:[6,'canada'],stadium:[3,'canada']};
+function goose(x,z,kind){const g=new THREE.Group(),can=kind==='canada',body=ph(can?'#8a7a66':'#f4f2ec'),dark=ph(can?'#1d1d1b':'#f4f2ec'),bk=ph(can?'#1d1d1b':'#f08a1c'),leg=ph(can?'#2a2a28':'#f08a1c');
+ const b=mk(new THREE.SphereGeometry(.2,10,8),body,0,.3,0,g);b.scale.set(1,.8,1.45);
+ mk(new THREE.SphereGeometry(.12,8,6),ph(can?'#efe9dc':'#ffffff'),0,.24,.06,g).scale.set(1.3,.7,1.5);
+ const tail=mk(new THREE.ConeGeometry(.08,.16,6),body,0,.36,-.3,g);tail.rotation.x=-1.9;
+ const neck=new THREE.Group();neck.position.set(0,.38,.22);g.add(neck);
+ const n=mk(new THREE.CylinderGeometry(.04,.055,.34,7),dark,0,.16,0,neck);n.rotation.x=.25;
+ const hd=new THREE.Group();hd.position.set(0,.33,.05);neck.add(hd);mk(new THREE.SphereGeometry(.065,8,6),dark,0,0,0,hd).scale.set(1,.95,1.3);
+ const bc=mk(new THREE.ConeGeometry(.03,.1,6),bk,0,-.01,.11,hd);bc.rotation.x=Math.PI/2;
+ if(can)mk(new THREE.SphereGeometry(.035,6,5),ph('#f4f2ec'),0,-.02,.02,hd).scale.set(1.9,.8,1);
+ const wings=[];for(const sx of[-1,1]){const wp=new THREE.Group();wp.position.set(sx*.15,.42,.02);g.add(wp);const wm=mk(new THREE.BoxGeometry(.3,.025,.3),body,sx*.15,0,-.06,wp);wm.castShadow=false;wp.rotation.z=-sx*.9;wp.visible=false;wings.push(wp);}
+ const legs=[];for(const sx of[-1,1])legs.push(mk(new THREE.CylinderGeometry(.015,.015,.18,5),leg,sx*.07,.09,0,g,false));
+ g.position.set(x,0,z);g.rotation.y=rnd()*6.28;world.add(g);
+ return {g,neck,wings,legs,x,z,h:g.rotation.y,v:0,mode:'graze',t:rnd()*3,tx:x,tz:z,fl:0,ph:rnd()*6};}
+function spawnGeese(job){const cfg=GOOSE[job.theme];if(!cfg)return;let n=cfg[0];if(job.theme==='yard'&&rnd()<.5)n=0;
+ const cx=x0+job.w*(.25+rnd()*.5),cz=z0+job.h*(.25+rnd()*.5);
+ for(let i=0;i<n;i++)geese.push(goose(cx+(rnd()-.5)*3,cz+(rnd()-.5)*3,cfg[1]));}
+function updGeese(dt){if(!geese.length)return;gooseHonk-=dt;
+ const mx=G.foot?G.fx:G.x,mz=G.foot?G.fz:G.z,loud=!G.foot&&G.engine;
+ for(const q of geese){const dx=q.x-mx,dz=q.z-mz,d=Math.hypot(dx,dz)||.01,scare=loud?(G.blades?4.2:3.2):1.6;
+  if(d<scare&&!(G.intro>0)){if(q.mode!=='flee'){q.mode='flee';q.fl=.9;if(gooseHonk<=0){sfx('honk');gooseHonk=.7;}}q.t=2+rnd();const a=Math.atan2(dx,dz)+(rnd()-.5)*.6;q.tx=q.x+Math.sin(a)*5;q.tz=q.z+Math.cos(a)*5;}
+  if(d<.75){q.x=mx+dx/d*.8;q.z=mz+dz/d*.8;q.fl=1;}            // too close: a flapping hop out of the way
+  q.t-=dt;if(q.t<=0){if(q.mode==='flee')q.mode='graze';q.t=2+rnd()*4;q.tx=q.x+(rnd()-.5)*4;q.tz=q.z+(rnd()-.5)*4;}
+  q.tx=Math.min(x0+J.w+1.5,Math.max(x0-1.5,q.tx));q.tz=Math.min(z0+J.h+1.5,Math.max(z0-1.5,q.tz));
+  const ex=q.tx-q.x,ez=q.tz-q.z,ed=Math.hypot(ex,ez),sp=q.mode==='flee'?4.6:(ed>.3?.45:0);
+  q.v+=(sp-q.v)*Math.min(1,dt*4);
+  if(ed>.05){const th=Math.atan2(ex,ez);let dh=th-q.h;dh=Math.atan2(Math.sin(dh),Math.cos(dh));q.h+=dh*Math.min(1,dt*(q.mode==='flee'?8:3));}
+  q.x+=Math.sin(q.h)*q.v*dt;q.z+=Math.cos(q.h)*q.v*dt;
+  for(const o of obs)if(SOLID[o.k]){const ox=q.x-o.x,oz=q.z-o.z,od=Math.hypot(ox,oz);if(od<o.r+.25){q.x=o.x+ox/od*(o.r+.25);q.z=o.z+oz/od*(o.r+.25);}}
+  for(const r of geese)if(r!==q){const ox=q.x-r.x,oz=q.z-r.z,od=Math.hypot(ox,oz);if(od<.45&&od>0){q.x+=ox/od*(.45-od)*.5;q.z+=oz/od*(.45-od)*.5;}}
+  q.ph+=dt*(4+q.v*5);q.fl=Math.max(0,q.fl-dt);
+  q.g.position.set(q.x,q.fl>0?Math.sin(q.fl*Math.PI)*.35:Math.abs(Math.sin(q.ph))*.02*q.v,q.z);q.g.rotation.y=q.h;
+  const graze=q.mode==='graze'&&q.v<.2;q.neck.rotation.x+=((graze?1.5:q.mode==='flee'?-.25:0)-q.neck.rotation.x)*Math.min(1,dt*4);
+  const f=q.mode==='flee'||q.fl>0?.5+.5*Math.sin(q.ph*3.2):0;const fly=q.mode==='flee'||q.fl>0;q.wings[0].visible=q.wings[1].visible=fly;q.wings[0].rotation.z=.9-f*1.5;q.wings[1].rotation.z=-q.wings[0].rotation.z;
+  q.legs[0].rotation.x=Math.sin(q.ph)*.6*Math.min(1,q.v);q.legs[1].rotation.x=-q.legs[0].rotation.x;}}
 function genObs(theme,w,h,r){const o=[],free=(x,z,rr)=>Math.abs(x)<w/2-1.3&&Math.abs(z)<h/2-1.3&&(x-(-w/2+1.6))**2+(z-(h/2-1.6))**2>20&&o.every(p=>(p[1]-x)**2+(p[2]-z)**2>(rr+(p[3]||.4)+1.4)**2);
  const place=(k,n,rr)=>{for(let i=0;i<n;i++)for(let t=0;t<40;t++){const x=(r()-.5)*w,z=(r()-.5)*h,ra=typeof rr==='function'?rr():rr;if(free(x,z,ra)){o.push([k,x,z,ra]);break;}}};
  const n=(a,b)=>a+Math.floor(r()*(b-a+1));
@@ -554,7 +590,7 @@ function genObs(theme,w,h,r){const o=[],free=(x,z,rr)=>Math.abs(x)<w/2-1.3&&Math
  if(theme==='golf'){place('green',1,2.9);place('bunker',2,()=>1.6+r()*.6);place('tree',n(1,2),.8);}
  return o;}
 function loadWorld(job,home){
- disposeWorld();fadeTrees=[];world=new THREE.Group();S.add(world);J=job;rnd=mkRng(job.seed);obs=[];flag=null;fountain=null;
+ disposeWorld();fadeTrees=[];world=new THREE.Group();S.add(world);J=job;rnd=mkRng(job.seed);obs=[];flag=null;fountain=null;geese=[];gooseHonk=0;
  const T=THEMES[job.theme],{w,h}=job;x0=-w/2;z0=-h/2;
  S.background.set(T.sky);S.fog.color.set(T.sky);sun.position.set(T.sun[0],T.sun[1],T.sun[2]);sun.color.set(T.sun[3]);sun.intensity=T.sun[4];hemi.intensity=T.hemi;hemi.color.set(job.theme==='golf'?'#ffe7c4':'#eef8ff');
  const rough={yard:'#4c8634',farm:'#6c903e',park:'#4a8836',estate:'#4f8e38',golf:'#437c2f',stadium:'#3f7a2d'}[job.theme];
@@ -638,6 +674,7 @@ function loadWorld(job,home){
   mk(new THREE.PlaneGeometry(90,4),lam('#555a5c'),0,.016,z0+h+5.2,null,false).rotation.x=-Math.PI/2;
   vanDriver=spawnModel('udc-driver',world,x0+w+1.2,0,z0+h+3.3,Math.PI);vanDriver.visible=false;
   footFig=person(BRAND,'#c2b08a',BRAND,'#8d5a3b');const sh=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,1.4,6),ph('#e5482d'));sh.position.set(.25,.75,.35);sh.rotation.x=.9;footFig.add(sh);footFig.visible=false;world.add(footFig);
+  spawnGeese(job);
   const picks=seasonPicks(job.season),bp=[picks[0],P[AM().belt[0]]];
   photoBoard(x0-7.5,z0+h*.45,Math.PI/2,BANNER_AT[job.theme]);billboard(x0+w+7.5,z0+h*.45,-Math.PI/2,bp[1]||picks[0]);
  if(['farm','park','golf'].includes(job.theme))fenceBanner(0,z0-3.4,0,'skinny',6.4,3.42,.3);
@@ -846,6 +883,8 @@ function audioInit(){if(AC){AC.resume&&AC.resume();return;}try{AC=new(window.Aud
  blO=AC.createOscillator();blO.type='triangle';blO.frequency.value=210;blG=AC.createGain();blG.gain.value=0;blO.connect(blG);blG.connect(mst);blO.start();
  const sq=AC.createOscillator();sq.type='sine';sq.frequency.value=2400;sqG=AC.createGain();sqG.gain.value=0;sq.connect(sqG);sqG.connect(mst);sq.start();musInit();if(MUS.on>=0)radioSet(MUS.on);}catch(e){AC=null;}}
 function sfx(k){if(!AC||muted)return;const t=AC.currentTime;
+ if(k==='honk'){for(let i=0;i<2;i++){const s0=t+i*.17,o=AC.createOscillator(),bp=AC.createBiquadFilter(),g2=AC.createGain();o.type='sawtooth';o.frequency.setValueAtTime(430+Math.random()*40,s0);o.frequency.exponentialRampToValueAtTime(330,s0+.13);
+  bp.type='bandpass';bp.frequency.value=1150;bp.Q.value=3;g2.gain.setValueAtTime(.0001,s0);g2.gain.exponentialRampToValueAtTime(.35,s0+.02);g2.gain.exponentialRampToValueAtTime(.001,s0+.15);o.connect(bp);bp.connect(g2);g2.connect(mst);o.start(s0);o.stop(s0+.2);}return;}
  if(k==='snap'||k==='crank'){const len=k==='crank'?.9:.35,b=AC.createBuffer(1,AC.sampleRate*len,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++){const tt=i/AC.sampleRate;d[i]=(Math.random()*2-1)*(k==='crank'?(.5+.5*Math.sin(tt*2*Math.PI*9))*.6:(1-i/d.length)**2);}
   const s=AC.createBufferSource(),gn=AC.createGain(),lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=k==='crank'?700:4000;s.buffer=b;gn.gain.value=.45;s.connect(lp);lp.connect(gn);gn.connect(mst);s.start(t);return;}
  const tones={clang:[[880,.25],[1330,.18]],ding:[[660,.15],[990,.15]],bad:[[150,.2]],beep:[[520,.1]],go:[[880,.16]],sip:[[330,.07],[440,.05]]}[k];if(!tones)return;
@@ -985,7 +1024,7 @@ function vanStep(dt){const V=G.van;if(!V)return;V.t+=dt;const k=Math.min(1,V.t/6
  if(V&&V.t>.1&&V.t<.2&&!V.hint){V.hint=1;}}
 function endIntro(){if(G.intro>0){G.intro=0;$('#bubble').hidden=true;placeCam(true);}}
 function step(dt){
- const dk=DECKS[AM().deck];
+ const dk=DECKS[AM().deck];updGeese(dt);
  if(G.intro>0){G.intro-=dt;const c=clientFig.position,t=Math.min(1,(4.5-G.intro)/4.5);cam.position.set(c.x+.6-t*.4,1.55+t*.3,c.z+2.7+t*1.2);cam.lookAt(c.x,1.35,c.z);if(G.intro<=0)endIntro();return;}
  if(G.crank>0){G.crank-=dt;if(G.crank<=0){G.engine=true;$('#b-key').classList.remove('crank');toast(G.job.tut&&!G.tipK?'Engine running. Set the deck height, then BLADES (Space).':'Engine running.','good');G.tipK=1;hud();}}
  G.time-=dt;
