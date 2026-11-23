@@ -265,6 +265,7 @@ form.mail input{flex:1 1 200px;font:inherit;font-size:16px;padding:10px 12px;bor
     <h2>Paused</h2>
     <div class="row"><button class="btn" id="b-resume">Resume</button><button class="btn ghost" id="b-end">Call the client now</button><button class="btn ghost" id="b-mute2">Sound on</button><button class="btn ghost" id="b-quit">Abandon job</button></div>
     <p class="small mut">Abandoning costs 2 reputation and the day.</p>
+    <p class="small"><a class="fb" href="#" target="_blank" rel="noopener">Report a bug / leave feedback</a></p>
   </div>
 </section>
 
@@ -325,7 +326,7 @@ const MOWERS=[
  {id:'jd42',brand:'John Deere',model:'42" deck',deck:42,price:0,belt:['GX20072'],blades:['GX22151'],st:{L:1.75,W:.96,rw:.37,fw:.25,hood:'round'},model3d:{f:'mower-s100',s:1.92,ry:Math.PI/2,head:[0,1.74,-.5],hero:[0,.3,-.28]},note:'Used, from a garage sale'},
  {id:'hq46',brand:'Husqvarna',model:'46" deck',deck:46,price:1600,belt:['405143'],blades:['405380'],st:{L:1.82,W:1,rw:.38,fw:.25,hood:'round',fender:true}},
  {id:'cc54',brand:'Cub Cadet',model:'XT2 54"',deck:54,price:2400,belt:['954-05025A'],blades:['942-0677B','742P05086','742-0677-X'],st:{L:2.0,W:1.1,rw:.44,fw:.27,hood:'box',fender:true},model3d:{f:'mower-xt2',s:1.85,ry:-.768,head:[0,1.72,-.45],hero:[0,.3,-.25]}},
- {id:'hqv5',brand:'Husqvarna',model:'V500 stand-on',deck:54,price:4200,belt:['522811301'],blades:['187256'],st:{L:2.0,W:1.2,rw:.45,fw:.28,hood:'box'},ztr:true,stand:true,model3d:{f:'mower-v500',s:1.8,ry:-2.513,head:[0,1.95,-.8]}},
+ {id:'hqv5',brand:'Husqvarna',model:'V500 stand-on',deck:54,price:4200,belt:['522811301'],blades:['187256'],st:{L:2.0,W:1.2,rw:.45,fw:.28,hood:'box'},ztr:true,stand:true,model3d:{f:'mower-v500',s:1.8,ry:-2.513,head:[0,1.92,-.48],hero:[0,.22,-.5]}},
  {id:'hq54',brand:'Husqvarna',model:'54" deck',deck:54,price:2800,belt:['196103'],blades:['187256'],st:{L:2.02,W:1.1,rw:.45,fw:.28,hood:'wedge',fender:true,exhaust:true}}
 ];
 const DRINKS=[{id:'water',name:'Spring water',short:'Water',price:1,q:55,eff:'',col:'#9fd3ff',note:'Biggest thirst fix'},
@@ -401,9 +402,11 @@ const lam=c=>new THREE.MeshLambertMaterial({color:c});
 // ---------- 3D models (assets/models/*.glb, from Higgsfield) ----------
 const MPATH='assets/models/',MODELS={},MIX=[];
 function loadModel(n){if(!MODELS[n])MODELS[n]=new Promise(res=>{if(!THREE.GLTFLoader)return res(null);try{new THREE.GLTFLoader().load(MPATH+n+'.glb',g=>{g.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.encoding=THREE.LinearEncoding;if('metalness' in m){m.metalness=0;m.roughness=Math.max(.55,m.roughness||.6);}m.needsUpdate=true;});}});res(g);},undefined,()=>res(null));}catch(e){res(null);}});return MODELS[n];}
-function spawnModel(n,parent,x,y,z,ry,scale=1){const h=new THREE.Group();h.position.set(x,y,z);h.rotation.y=ry||0;parent.add(h);
+function spawnModel(n,parent,x,y,z,ry,scale=1,upper=false){const h=new THREE.Group();h.position.set(x,y,z);h.rotation.y=ry||0;parent.add(h);
  h.userData.ready=loadModel(n).then(g=>{if(!g||!h.parent)return null;const o=(g.animations.length&&THREE.SkeletonUtils)?THREE.SkeletonUtils.clone(g.scene):g.scene.clone();o.scale.setScalar(scale);h.add(o);
-  if(g.animations.length){const mx=new THREE.AnimationMixer(o);mx.clipAction(g.animations[0]).play();mx.update(Math.random()*3);MIX.push({mx,h});}return o;});return h;}
+  if(g.animations.length){const mx=new THREE.AnimationMixer(o);let clip=g.animations[0];
+   if(upper){clip=clip.clone();clip.tracks=clip.tracks.filter(t=>!/(UpLeg|Leg|Foot|Toe|Hips)\./.test(t.name));} // stand-on: keep the seated arms, standing legs
+   mx.clipAction(clip).play();mx.update(Math.random()*3);MIX.push({mx,h});}return o;});return h;}
 const CLIENT_MODEL={yard:['kowalski','neighbor-woman','neighbor-dad'],farm:['hank'],park:['park-manager'],estate:['ashford'],golf:['dale'],stadium:['park-manager']};
 const BY_NAME={'Mrs. Kowalski':'kowalski','Jess':'neighbor-woman','Mike':'neighbor-dad','Big Hank':'hank','Denise, Parks Dept.':'park-manager','Lady Ashford':'ashford','Dale, head greenskeeper':'dale','Stadium grounds crew':'park-manager'};
 const CAST=[['kowalski','Mrs. Kowalski','neighbor'],['neighbor-woman','Jess','neighbor'],['neighbor-dad','Mike','neighbor'],['hank','Big Hank','farmer'],['park-manager','Denise','parks dept.'],['ashford','Lady Ashford','estate owner'],['dale','Dale','greenskeeper'],['udc-driver','Tasha','UDC delivery'],['rival','Marcus','Turf Kings']];
@@ -469,7 +472,9 @@ function buildMower(m,paint){
  mower.userData.head=new THREE.Vector3(0,by+1.32,-.52);DECK=DECKS[m.deck].r;
  const proc=mower.children.slice(),tok=(buildMower.tok=(buildMower.tok||0)+1);
  const M3=m.model3d;
- if(m.stand){dr.children.slice(0,2).forEach(l=>{l.rotation.x=0;l.position.set(l.position.x,.4,0);});dr.children.slice(3,5).forEach(a=>{a.rotation.x=-.6;});dr.position.set(0,.25,-L*.48);mower.userData.head.set(0,1.95,-L*.48);}
+ if(m.stand){dr.children.slice(0,2).forEach(l=>{l.rotation.x=0;l.position.set(l.position.x,.4,0);});dr.children.slice(3,5).forEach(a=>{a.rotation.x=-.6;});dr.position.set(0,.25,-L*.48);mower.userData.head.set(0,1.95,-L*.48);
+  const hp=M3&&M3.hero?M3.hero:[0,.25,-L*.48];const hero=spawnModel('hero',mower,hp[0],hp[1],hp[2],0,1,true);hero.visible=false;
+  hero.userData.ready.then(o=>{if(!o||tok!==buildMower.tok)return;const wasVis=dr.visible;dr.visible=false;hero.visible=wasVis;mower.userData.driver=hero;});}
  else{const hp=M3&&M3.hero?M3.hero:[0,by-.2,-.42];const hero=spawnModel('hero',mower,hp[0],hp[1],hp[2],0);hero.visible=false;
   hero.userData.ready.then(o=>{if(!o||tok!==buildMower.tok)return;const wasVis=dr.visible;dr.visible=false;hero.visible=wasVis;mower.userData.driver=hero;});}
  if(M3){const mm=spawnModel(M3.f,mower,0,0,.05,M3.ry,M3.s);mm.userData.ready.then(o=>{if(!o||tok!==buildMower.tok)return;proc.forEach(c=>{if(c!==dr&&!c.userData.keep)c.visible=false;});wheels=[];swheel=null;mower.userData.head.set(...M3.head);});}}
@@ -756,6 +761,12 @@ $('#b-pitx').onclick=()=>{state='play';show(null);};
 
 // finish and pay
 function reqH(j){return logoMask&&logoMask[j]?1.5:G.job.height;}
+// Feedback for testers: opens a GitHub issue with the game state filled in
+const REPO='https://github.com/Drongo7777777/mow-pro';
+function fbUrl(){let w='Title screen';try{const j=G&&G.job;w=SV?`Day ${SV.day}, ${j?j.label+(j.client?' ('+j.client+')':''):'phone'}, ${mname(AM())}, view ${view}`:'Title screen';}catch(e){}
+ const dev=/iPhone|iPad/.test(navigator.userAgent)?'iPhone':/Android/.test(navigator.userAgent)?'Android':/Chrome/.test(navigator.userAgent)?'Компьютер (Chrome)':'Компьютер (Safari / другой)';
+ return REPO+'/issues/new?template=bug.yml&level='+encodeURIComponent(w)+'&device='+encodeURIComponent(dev);}
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a.fb');if(a)a.href=fbUrl();},true);
 function finish(abandon){if(state!=='play'&&state!=='pause')return;state='result';const job=G.job,m=AM(),c=cond(m.id);
  if(!job.practice&&!job.weekly){c.belt=G.belt;c.sharp=G.sharp;c.hours=G.startHours+(job.time-G.time)/60*.6+.5;}
  const cov=total?cutN/total*100:0,q=cutN?cleanN/cutN*100:0;let hOk=0,eCut=0;for(let j=0;j<st.length;j++){if((st[j]===1||st[j]===2)&&Math.abs(hs[j]/2-reqH(j))<=.26)hOk++;if(edge[j]&&st[j]&&st[j]!==255)eCut++;}
@@ -774,7 +785,7 @@ function finish(abandon){if(state!=='play'&&state!=='pause')return;state='result
  const words=['"I want my money back."','"Well... it is shorter, I guess."','"It will do."','"Nice work."','"Great job, I will tell my friends."','"Perfect. You are my lawn guy now."'];
  const used=(G.used.length?G.used:[m.belt[0],m.blades[0]]).map(pn=>partCard(P[pn],'link')).join('');
  const share=`My UDC Lawn Co. got ${s}★ from ${job.client} on Mow Pro by UDC Parts. udcparts.com`;
- $('#res').innerHTML=`<a class="adban" href="https://udcparts.com" target="_blank" rel="noopener"><img src="${BN}strip-500x100.jpg" alt="UDC Parts — engineered to work, built to last" width="500" height="100"></a><div class="brand"><span class="badge">UDC PARTS</span> Day ${job.practice||job.weekly?SV.day:SV.day-1} · ${job.label} · ${SEASONS[job.season].n}</div>
+ $('#res').innerHTML=`<p class="small" style="text-align:right;margin:0 0 8px"><a class="fb" href="${fbUrl()}" target="_blank" rel="noopener">Report a bug / feedback</a></p><a class="adban" href="https://udcparts.com" target="_blank" rel="noopener"><img src="${BN}strip-500x100.jpg" alt="UDC Parts — engineered to work, built to last" width="500" height="100"></a><div class="brand"><span class="badge">UDC PARTS</span> Day ${job.practice||job.weekly?SV.day:SV.day-1} · ${job.label} · ${SEASONS[job.season].n}</div>
  <h2>${abandon?'Job abandoned':job.tut||job.practice?'Your own yard':job.weekly?'Weekly challenge':job.client+' rates you'}</h2><div class="stars">${starTxt(s)}</div>
  <blockquote>${abandon?'"You just left? Unbelievable."':words[s]}${rivalMsg?'<br><span class="small">'+rivalMsg+'</span>':''}${wkMsg?'<br><span class="small">'+wkMsg+'</span>':''}</blockquote>
  <div class="stats">${lines.map(([a,b,ok])=>`<div class="stat"><span>${a}</span><b class="${ok?'ok':'no'}">${b}</b></div>`).join('')}
