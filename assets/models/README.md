@@ -14,7 +14,10 @@
 | `ashford.glb` | Lady Ashford | bc647cfc-4feb-49f5-b0c0-b11e2fbcd242 |
 | `udc-driver.glb` | Водитель фургона UDC | 6e1a3c1f-3e52-48a8-9279-7c7468bff504 |
 | `neighbor-woman.glb` | Спортивная соседка | be24aca3-4269-4b84-8854-c9d689e93612 |
-| `rival.glb` | Конкурент Turf Kings | 010665ae-88e4-4770-a952-0b497ee60b69 |
+| `rival.glb` | Конкурент Turf Kings, Marcus | 010665ae-88e4-4770-a952-0b497ee60b69 |
+| `neighbor-dad.glb` | Mike, молодой отец-сосед (ожидается) | 3bacd3a9-26da-4319-a78e-91d1856f30d3 |
+| `mower-v500.glb` | Husqvarna V500, стоячая (ожидается) | 65c2d443-06b4-4ff6-9a0b-24fc79b9809d |
+| `mower-xt2.glb` | Cub Cadet XT2 54″ (ожидается) | cb08dba1-7739-4124-aa17-0a6971dbae34 |
 
 Как сжать новый файл:
 ```

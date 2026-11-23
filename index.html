@@ -128,6 +128,8 @@ form.mail input{flex:1 1 200px;font:inherit;font-size:16px;padding:10px 12px;bor
 #pop{position:absolute;left:50%;top:56%;transform:translateX(-50%);font-weight:900;font-size:22px;color:var(--y);text-shadow:0 2px 8px rgba(0,0,0,.6);opacity:0;white-space:nowrap}
 #pop.on{animation:rise 1.1s ease-out}
 @keyframes rise{0%{opacity:0;transform:translate(-50%,10px)}15%{opacity:1}100%{opacity:0;transform:translate(-50%,-50px)}}
+#bubble{position:absolute;left:50%;bottom:18%;transform:translateX(-50%);width:min(92vw,520px);background:#fff;color:#17201a;border-radius:18px;padding:14px 18px;box-shadow:0 12px 40px rgba(0,0,0,.35);pointer-events:auto;font-size:17px;line-height:1.35}
+#bubble b{display:block;color:var(--brand);font-size:14px;margin-bottom:4px}#bubble span{display:block}#bubble small{display:block;margin-top:8px;color:#56645a;font-size:12px}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
 #vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 40%,transparent 55%,rgba(0,0,0,.35));display:none}
 .fp #vig{display:block}
@@ -199,6 +201,7 @@ form.mail input{flex:1 1 200px;font:inherit;font-size:16px;padding:10px 12px;bor
   <canvas id="mini" width="236" height="236" aria-label="Lawn map"></canvas>
   <div id="toast" role="status"></div>
   <div id="pop"></div>
+  <div id="bubble" hidden><b id="bb-n"></b><span id="bb-q"></span><small>Tap or press any key to start</small></div>
   <div id="flash"></div>
   <div id="pad"><div id="joy"><div id="knob"></div></div></div>
   <div class="keys">W A S D drive · K key · Space blades · R / F deck · T trimmer · Q drink · E shed · C camera · M radio</div>
@@ -309,7 +312,8 @@ const PRODUCTS=[
  ['742P05086','19987268695','blade','High Lift Blades for Cub Cadet 54", 3 Pack','54 inch deck',43],
  ['742-0677-X','21167519917','gator','Gator Blades for Cub Cadet 54", 3 Pack','6-point star center hole',32],
  ['954-04138A','14129616383','belt','Deck Belt for Cub Cadet 54"','5/8" x 143"',25],
- ['954-0642','5339937985','belt','Deck Belt for Cub Cadet 54"','5/8" x 138"',23]
+ ['954-0642','5339937985','belt','Deck Belt for Cub Cadet 54"','5/8" x 138"',23],
+ ['522811301','20165959430','belt','Deck Belt for Husqvarna 52"','52 inch deck',20] // V500 fit is a test placeholder, confirm before launch
 ];
 const P={};PRODUCTS.forEach(([pn,id,t,name,spec,price])=>P[pn]={pn,id,t,name,spec,price,kind:t==='belt'?'belt':'blades'});
 // fits come only from listing names; stats are game stats by deck size
@@ -317,9 +321,10 @@ const MOWERS=[
  {id:'tb42',brand:'Troy-Bilt',model:'Pony 42',deck:42,price:650,belt:['954-04060C'],blades:['942-04308'],st:{L:1.55,W:.9,rw:.34,fw:.23,hood:'box'}},
  {id:'cr42',brand:'Craftsman',model:'42" deck',deck:42,price:650,belt:['144959'],blades:['138971','134149'],st:{L:1.7,W:.92,rw:.35,fw:.24,hood:'wedge'}},
  {id:'cc42',brand:'Cub Cadet',model:'XT1 LT42',deck:42,price:750,belt:['954-05021'],blades:['942-0616A','942-04308'],st:{L:1.7,W:.95,rw:.36,fw:.24,hood:'box',fender:true}},
- {id:'jd42',brand:'John Deere',model:'42" deck',deck:42,price:0,belt:['GX20072'],blades:['GX22151'],st:{L:1.75,W:.96,rw:.37,fw:.25,hood:'round'},model3d:'mower-s100',note:'Used, from a garage sale'},
+ {id:'jd42',brand:'John Deere',model:'42" deck',deck:42,price:0,belt:['GX20072'],blades:['GX22151'],st:{L:1.75,W:.96,rw:.37,fw:.25,hood:'round'},model3d:{f:'mower-s100',s:1.92,ry:Math.PI/2,head:[0,1.74,-.5],hero:[0,.3,-.28]},note:'Used, from a garage sale'},
  {id:'hq46',brand:'Husqvarna',model:'46" deck',deck:46,price:1600,belt:['405143'],blades:['405380'],st:{L:1.82,W:1,rw:.38,fw:.25,hood:'round',fender:true}},
- {id:'cc54',brand:'Cub Cadet',model:'XT2 54"',deck:54,price:2400,belt:['954-05025A'],blades:['942-0677B','742P05086','742-0677-X'],st:{L:2.0,W:1.1,rw:.44,fw:.27,hood:'box',fender:true},confirm:'blades'},
+ {id:'cc54',brand:'Cub Cadet',model:'XT2 54"',deck:54,price:2400,belt:['954-05025A'],blades:['942-0677B','742P05086','742-0677-X'],st:{L:2.0,W:1.1,rw:.44,fw:.27,hood:'box',fender:true},model3d:{f:'mower-xt2',s:2.1,ry:Math.PI/2,head:[0,1.8,-.55],hero:[0,.32,-.3]}},
+ {id:'hqv5',brand:'Husqvarna',model:'V500 stand-on',deck:54,price:4200,belt:['522811301'],blades:['187256'],st:{L:2.0,W:1.2,rw:.45,fw:.28,hood:'box'},ztr:true,stand:true,model3d:{f:'mower-v500',s:2.1,ry:Math.PI/2,head:[0,1.95,-.8]}},
  {id:'hq54',brand:'Husqvarna',model:'54" deck',deck:54,price:2800,belt:['196103'],blades:['187256'],st:{L:2.02,W:1.1,rw:.45,fw:.28,hood:'wedge',fender:true,exhaust:true}}
 ];
 const DRINKS=[{id:'water',name:'Spring water',short:'Water',price:1,q:55,eff:'',col:'#9fd3ff',note:'Biggest thirst fix'},
@@ -333,16 +338,16 @@ const mname=m=>m.brand+' '+m.model;
 
 const THEMES={
  yard:{label:'Front yard',w:[18,24],h:[14,18],pay:[70,95],hts:[3,3.5],q:0,stripes:0,sky:'#a9d9f2',sun:[-18,32,16,'#fff2d4',.78],hemi:.62,
-  clients:['Mrs. Kowalski','Mr. Alvarez','The Nguyens','Pastor Bill','Mrs. Patel','Coach Ray'],
+  clients:['Mrs. Kowalski','Jess','Mike'],
   quotes:['Keep it neat and do not touch my flower beds.','My gnomes are family. Mow around them.','Just make it look nicer than the neighbor’s.','Three inches, please. Not a hair lower.']},
  farm:{label:'Farm field',w:[26,32],h:[20,24],pay:[140,180],hts:[3.5,4],q:0,stripes:0,sky:'#bfe2f5',sun:[10,36,8,'#ffffff',.85],hemi:.6,
-  clients:['Big Hank','Farmer Jo','Old Earl'],
+  clients:['Big Hank'],
   quotes:['Ground is full of rocks. Watch your blades.','Leave it tall, the cattle like it that way.','Mow past the hay bales, not into them.']},
  park:{label:'City park',w:[26,32],h:[22,28],pay:[190,240],hts:[3],q:75,stripes:4,sky:'#b7dcf0',sun:[-6,34,20,'#fff6e0',.8],hemi:.62,
-  clients:['Parks Dept.','Ranger Sue'],
+  clients:['Denise, Parks Dept.'],
   quotes:['Families picnic here this weekend. Make it look sharp.','Some nice stripes along the paths, please.']},
  estate:{label:'Estate lawn',w:[28,32],h:[24,28],pay:[280,340],hts:[2.5],q:85,stripes:6,bag:true,sky:'#c9e4f2',sun:[-22,30,10,'#fff0d8',.82],hemi:.6,
-  clients:['Mr. Whitmore','Lady Ashford'],
+  clients:['Lady Ashford'],
   quotes:['Garden party on Saturday. I expect perfect stripes.','The topiary cost more than your mower. Mind it.']},
  golf:{label:'Golf fairway',w:[28,32],h:[28,32],pay:[400,480],hts:[1.5,2],q:88,stripes:6,bag:true,sky:'#f4cf9c',sun:[-30,14,-22,'#ffc58a',.95],hemi:.5,
   clients:['Dale, head greenskeeper'],
@@ -398,7 +403,12 @@ function loadModel(n){if(!MODELS[n])MODELS[n]=new Promise(res=>{if(!THREE.GLTFLo
 function spawnModel(n,parent,x,y,z,ry,scale=1){const h=new THREE.Group();h.position.set(x,y,z);h.rotation.y=ry||0;parent.add(h);
  h.userData.ready=loadModel(n).then(g=>{if(!g||!h.parent)return null;const o=(g.animations.length&&THREE.SkeletonUtils)?THREE.SkeletonUtils.clone(g.scene):g.scene.clone();o.scale.setScalar(scale);h.add(o);
   if(g.animations.length){const mx=new THREE.AnimationMixer(o);mx.clipAction(g.animations[0]).play();mx.update(Math.random()*3);MIX.push({mx,h});}return o;});return h;}
-const CLIENT_MODEL={yard:['kowalski','neighbor-woman'],farm:['hank'],park:['park-manager'],estate:['ashford'],golf:['dale'],stadium:['park-manager']};
+const CLIENT_MODEL={yard:['kowalski','neighbor-woman','neighbor-dad'],farm:['hank'],park:['park-manager'],estate:['ashford'],golf:['dale'],stadium:['park-manager']};
+const BY_NAME={'Mrs. Kowalski':'kowalski','Jess':'neighbor-woman','Mike':'neighbor-dad','Big Hank':'hank','Denise, Parks Dept.':'park-manager','Lady Ashford':'ashford','Dale, head greenskeeper':'dale','Stadium grounds crew':'park-manager'};
+const CAST=[['kowalski','Mrs. Kowalski','neighbor'],['neighbor-woman','Jess','neighbor'],['neighbor-dad','Mike','neighbor'],['hank','Big Hank','farmer'],['park-manager','Denise','parks dept.'],['ashford','Lady Ashford','estate owner'],['dale','Dale','greenskeeper'],['udc-driver','Tasha','UDC delivery'],['rival','Marcus','Turf Kings']];
+function nameTag(t1,t2){const cv=document.createElement('canvas');cv.width=512;cv.height=128;const c=cv.getContext('2d');c.fillStyle='rgba(0,40,31,.88)';c.beginPath();c.moveTo(24,8);c.arcTo(504,8,504,120,22);c.arcTo(504,120,8,120,22);c.arcTo(8,120,8,8,22);c.arcTo(8,8,504,8,22);c.fill();
+ c.fillStyle='#fff';c.font='700 46px Rubik, Arial';c.textAlign='center';c.fillText(t1,256,62);c.fillStyle='#ffc21a';c.font='500 30px Rubik, Arial';c.fillText(t2,256,104);
+ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),depthTest:false}));sp.scale.set(1.3,.33,1);sp.renderOrder=5;return sp;}
 ['mower-s100','hero'].forEach(loadModel);
 function mk(geo,mat,x,y,z,par,shadow=true){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=shadow;(par||world).add(m);return m;}
 S.add(cam);const bottle=new THREE.Group(),bottleMat=new THREE.MeshPhongMaterial({color:'#9fd3ff',transparent:true,opacity:.9,shininess:90});bottle.add(new THREE.Mesh(new THREE.CylinderGeometry(.03,.034,.15,14),bottleMat));{const cp=new THREE.Mesh(new THREE.CylinderGeometry(.016,.02,.035,10),new THREE.MeshPhongMaterial({color:'#f4f4f4'}));cp.position.y=.09;bottle.add(cp);}bottle.visible=false;cam.add(bottle);
@@ -457,9 +467,11 @@ function buildMower(m,paint){
  const top=add(new THREE.PlaneGeometry(.55,.14),dm,0,by+.215,-.05);top.rotation.x=-Math.PI/2;top.castShadow=false;
  mower.userData.head=new THREE.Vector3(0,by+1.32,-.52);DECK=DECKS[m.deck].r;
  const proc=mower.children.slice(),tok=(buildMower.tok=(buildMower.tok||0)+1);
- const hero=spawnModel('hero',mower,0,m.model3d?.3:by-.2,m.model3d?-.28:-.42,0);hero.visible=false;
- hero.userData.ready.then(o=>{if(!o||tok!==buildMower.tok)return;const wasVis=dr.visible;dr.visible=false;hero.visible=wasVis;mower.userData.driver=hero;});
- if(m.model3d){const mm=spawnModel(m.model3d,mower,0,0,.05,Math.PI/2,1.92);mm.userData.ready.then(o=>{if(!o||tok!==buildMower.tok)return;proc.forEach(c=>{if(c!==dr&&!c.userData.keep)c.visible=false;});wheels=[];swheel=null;mower.userData.head.set(0,1.74,-.5);});}}
+ const M3=m.model3d;
+ if(m.stand){dr.children.slice(0,2).forEach(l=>{l.rotation.x=0;l.position.set(l.position.x,.4,0);});dr.children.slice(3,5).forEach(a=>{a.rotation.x=-.6;});dr.position.set(0,.25,-L*.48);mower.userData.head.set(0,1.95,-L*.48);}
+ else{const hp=M3&&M3.hero?M3.hero:[0,by-.2,-.42];const hero=spawnModel('hero',mower,hp[0],hp[1],hp[2],0);hero.visible=false;
+  hero.userData.ready.then(o=>{if(!o||tok!==buildMower.tok)return;const wasVis=dr.visible;dr.visible=false;hero.visible=wasVis;mower.userData.driver=hero;});}
+ if(M3){const mm=spawnModel(M3.f,mower,0,0,.05,M3.ry,M3.s);mm.userData.ready.then(o=>{if(!o||tok!==buildMower.tok)return;proc.forEach(c=>{if(c!==dr&&!c.userData.keep)c.visible=false;});wheels=[];swheel=null;mower.userData.head.set(...M3.head);});}}
 
 // ---------- particles ----------
 const NP=560,pPos=new Float32Array(NP*3),pCol=new Float32Array(NP*3),pVel=new Float32Array(NP*3),pLife=new Float32Array(NP),pGrav=new Float32Array(NP);let pI=0;
@@ -531,6 +543,8 @@ function loadWorld(job,home){
  if(job.theme!=='park'&&job.theme!=='golf'&&job.theme!=='stadium'){const pk=new THREE.InstancedMesh(new THREE.BoxGeometry(.1,.85,.1),fm,posts.length),d=new THREE.Object3D();posts.forEach(([a,b],j)=>{d.position.set(a,.42,b);d.updateMatrix();pk.setMatrixAt(j,d.matrix);});pk.castShadow=true;world.add(pk);
   for(const yy of[.3,.65]){mk(new THREE.BoxGeometry(fw,.07,.05),fm,0,yy,z0-m);mk(new THREE.BoxGeometry(fw,.07,.05),fm,0,yy,z0+h+m);mk(new THREE.BoxGeometry(.05,.07,fh),fm,x0-m,yy,0);mk(new THREE.BoxGeometry(.05,.07,fh),fm,x0+w+m,yy,0);}}
  else{const pm=lam('#d8cfba');for(const [a,b,c,d] of [[0,z0-m,fw,1.2],[0,z0+h+m,fw,1.2],[x0-m,0,1.2,fh],[x0+w+m,0,1.2,fh]])mk(new THREE.PlaneGeometry(c,d),pm,a,.02,b,null,false).rotation.x=-Math.PI/2;}
+ if(home){const pz=z0+h+6;CAST.forEach(([f,n,r],i)=>{const a=(i-(CAST.length-1)/2)*.27,hx=Math.sin(a)*5.2,hz=pz-Math.cos(a)*3.6;const ch=spawnModel(f,world,hx,0,hz,-a*.6);
+   ch.userData.ready.then(o=>{if(!o)return;const t=nameTag(n,r);t.position.set(0,2.05,0);ch.add(t);});});}
  if(home){const pad=mk(new THREE.CylinderGeometry(2.6,2.6,.08,40),lam('#cfd8d5'),0,.04,z0+h+6,null,false);pad.receiveShadow=true;mk(new THREE.CylinderGeometry(2.75,2.75,.05,40),lam(BRAND),0,.025,z0+h+6,null,false).receiveShadow=true;signBoard(3.6,z0+h+3.9).rotation.y=-.3;}
  const th=job.theme;
  if(th==='yard'){building(0,z0-6.5,11,4.2,6,home?'#e3ece8':'#efe6d2',home?BRAND:'#7c3b2f');mk(new THREE.PlaneGeometry(70,2.4),lam('#d2cdc2'),0,.02,z0+h+3.2,null,false).rotation.x=-Math.PI/2;building(-17,z0-6,8,3.6,6,'#d8e4ec','#3d4a5a');building(17,z0-6,8,3.6,6,'#f1d9c4','#5a3d2f');}
@@ -540,7 +554,7 @@ function loadWorld(job,home){
  if(th==='golf'){building(0,z0-9,14,4,7,'#f7f5ef',BRAND);}
  for(let k=0;k<46;k++){const a=rnd()*6.28,rr=Math.max(w,h)/2+5+rnd()*22,x=Math.cos(a)*rr,z=Math.sin(a)*rr;if(z<z0-2&&Math.abs(x)<16)continue;if(home&&z>z0+h+1&&z<z0+h+11&&Math.abs(x)<8)continue;tree(x,z,.9+rnd()*.7,th==='golf'||th==='estate'||rnd()>.7);}
  // client waiting outside the lawn
- clientFig=null;if(!home&&!job.tut&&!job.practice){const cr=mkRng(job.seed+5),list=CLIENT_MODEL[job.theme]||['kowalski'],cm=job.client==='Mrs. Kowalski'?'kowalski':pick(list,cr);
+ clientFig=null;if(!home&&!job.tut&&!job.practice){const cr=mkRng(job.seed+5),list=CLIENT_MODEL[job.theme]||['kowalski'],cm=BY_NAME[job.client]||pick(list,cr);
   clientFig=spawnModel(cm,world,x0+w*.3,0,z0-2.4,0);
   if(job.rival){const rv=spawnModel('rival',world,x0+w*.3+1.6,0,z0-2.9,-.4);}}
  nx=Math.ceil(w/C);nz=Math.ceil(h/C);st=new Uint8Array(nx*nz);hs=new Uint8Array(nx*nz);inst=new Int32Array(nx*nz).fill(-1);total=0;
@@ -681,8 +695,10 @@ function startJob(job){audioInit();job.season=sIx();loadWorld(job,false);const m
  $('#h-want').textContent=job.logo?'logo 1.5 · field '+job.height.toFixed(1):'wants '+job.height.toFixed(1)+'"';
  $('#mg').hidden=!SV.bagger;
  state='play';show(null);hud(0);mini();setView(view);
+ if(clientFig){G.intro=4.5;$('#bb-n').textContent=job.client+(job.rival?' · Marcus from Turf Kings is watching':'');$('#bb-q').textContent='“'+job.quote+'”'+(job.rival?' Marcus: “Bet you can’t get four stars.”':'');$('#bubble').hidden=false;}
  toast(job.tut?'Tutorial: tap KEY (or press K) to start the engine':job.logo?'Big one: mow the UDC logo at 1.5", the rest at 3". Follow the chalk lines.':'Tap KEY to start the engine. Client wants '+job.height.toFixed(1)+'".');}
-function setView(v){view=v;ls.set('view',v);$('#app').classList.toggle('fp',v==='fp');if(mower.userData.driver)mower.userData.driver.visible=v!=='fp'||state!=='play'||G.foot;if(footFig)footFig.visible=!!G.foot&&v!=='fp';cam.fov=v==='fp'?72:(innerWidth<innerHeight?66:55);cam.updateProjectionMatrix();if(state==='play')placeCam(true);}
+function cycleView(){setView(view==='fp'?'tp':view==='tp'?'top':'fp');toast({fp:'Seat view',tp:'Chase view',top:'Top view'}[view]);}
+function setView(v){view=v;$('#b-view').textContent={fp:'Seat',tp:'Chase',top:'Top'}[v]||'Cam';ls.set('view',v);$('#app').classList.toggle('fp',v==='fp');if(mower.userData.driver)mower.userData.driver.visible=v!=='fp'||state!=='play'||G.foot;if(footFig)footFig.visible=!!G.foot&&v!=='fp';cam.fov=v==='fp'?72:(innerWidth<innerHeight?66:55);cam.updateProjectionMatrix();if(state==='play')placeCam(true);}
 function keyTurn(){if(state!=='play'||G.foot)return;if(G.engine){G.engine=false;G.blades=false;hud();return;}if(G.fuel<=0){toast('Out of gas. Get a gas can in the shed.','bad');return;}if(G.crank>0)return;G.crank=.9;sfx('crank');$('#b-key').classList.add('crank');}
 function toggleBlades(){if(G.foot){toast('Hop back on the mower first (T).','bad');return;}if(!G.engine){toast('Start the engine first (KEY).','bad');return;}if(G.snap){toast('The deck belt is broken. Head to the shed.','bad');sfx('bad');return;}if(G.bagFull){toast('Bagger is full. Empty it at the compost bin.','bad');return;}G.blades=!G.blades;if(G.blades&&J.tut&&!G.tipH){G.tipH=1;toast('Mow in long straight passes. Overlap a little.');}hud();}
 function toggleDrinks(){if(state!=='play')return;const b=$('#drinkbar');b.hidden=!b.hidden;if(!b.hidden)renderDrinkbar();}
@@ -760,7 +776,7 @@ function finish(abandon){if(state!=='play'&&state!=='pause')return;state='result
  $('#r-phone').onclick=()=>openPhone('jobs');
  $('#r-mail').onsubmit=e=>{e.preventDefault();$('#r-mailmsg').innerHTML='Your code: <span class="code">'+COUPON+'</span> (placeholder until signup is connected)';};
  $('#r-share').onclick=async()=>{try{await navigator.clipboard.writeText(share);$('#r-sharemsg').textContent='Copied. Paste it anywhere.';}catch(e){$('#r-sharemsg').textContent=share;}};
- G.engine=false;G.blades=false;G.foot=false;$('#heat').style.opacity=0;bottle.visible=false;trimCam.visible=false;sfx(s>=3?'ding':'bad');show('s-result');}
+ G.engine=false;G.blades=false;G.foot=false;G.intro=0;$('#bubble').hidden=true;$('#heat').style.opacity=0;bottle.visible=false;trimCam.visible=false;sfx(s>=3?'ding':'bad');show('s-result');}
 
 // ---------- audio ----------
 let AC=null,mst,engO,engG,blO,blG,sqG,muted=ls.get('muted',false);
@@ -814,8 +830,8 @@ function audioTick(cutting){if(!AC)return;const t=AC.currentTime,on=state==='pla
  sqG.gain.setTargetAtTime(on&&G.blades&&G.belt<25&&Math.sin(t*18)>.3?.008:0,t,.02);}
 
 // ---------- input ----------
-addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if(state==='play'){
- if(k===' '){e.preventDefault();toggleBlades();}if(k==='k'||k==='enter')keyTurn();if(k==='e')openShed();if(k==='r')setHeight(1);if(k==='f')setHeight(-1);if(k==='c')setView(view==='fp'?'tp':'fp');if(k==='q')toggleDrinks();if(k==='t')toggleTrim();if(k==='m')radioCycle();if(k==='1'||k==='2'||k==='3')drink(DRINKS[+k-1].id);if(k==='escape'||k==='p')pause();if(k.startsWith('arrow'))e.preventDefault();}});
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if(state==='play'&&G.intro>0){endIntro();return;}if(state==='play'){
+ if(k===' '){e.preventDefault();toggleBlades();}if(k==='k'||k==='enter')keyTurn();if(k==='e')openShed();if(k==='r')setHeight(1);if(k==='f')setHeight(-1);if(k==='c')cycleView();if(k==='q')toggleDrinks();if(k==='t')toggleTrim();if(k==='m')radioCycle();if(k==='1'||k==='2'||k==='3')drink(DRINKS[+k-1].id);if(k==='escape'||k==='p')pause();if(k.startsWith('arrow'))e.preventDefault();}});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
 const padEl=$('#pad'),joyEl=$('#joy'),knob=$('#knob');
 if(matchMedia('(pointer:coarse)').matches)$('#app').classList.add('touch');
@@ -830,7 +846,8 @@ function pause(){if(state!=='play')return;state='pause';show('s-pause');}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
 const blurClick=(id,fn)=>$(id).onclick=e=>{e.currentTarget.blur();fn();};
 function radioCycle(){audioInit();radioSet(MUS.on>=STATIONS.length-1?-1:MUS.on+1);if(MUS.on<0)toast('Radio off');}
-blurClick('#b-key',keyTurn);blurClick('#b-trim',toggleTrim);blurClick('#b-radio',radioCycle);blurClick('#b-drink',toggleDrinks);$('#drinkbar').onclick=e=>{const b=e.target.closest('[data-dr]');if(b&&!b.disabled){b.blur();drink(b.dataset.dr);}};blurClick('#b-blades',toggleBlades);blurClick('#b-shed',openShed);blurClick('#h-up',()=>setHeight(1));blurClick('#h-dn',()=>setHeight(-1));blurClick('#b-view',()=>setView(view==='fp'?'tp':'fp'));
+$('#bubble').onclick=endIntro;padEl.addEventListener('pointerdown',()=>{if(state==='play'&&G.intro>0)endIntro();},true);
+blurClick('#b-key',keyTurn);blurClick('#b-trim',toggleTrim);blurClick('#b-radio',radioCycle);blurClick('#b-drink',toggleDrinks);$('#drinkbar').onclick=e=>{const b=e.target.closest('[data-dr]');if(b&&!b.disabled){b.blur();drink(b.dataset.dr);}};blurClick('#b-blades',toggleBlades);blurClick('#b-shed',openShed);blurClick('#h-up',()=>setHeight(1));blurClick('#h-dn',()=>setHeight(-1));blurClick('#b-view',cycleView);
 $('#b-finish').onclick=()=>finish(false);$('#b-pause').onclick=pause;
 $('#b-resume').onclick=()=>{state='play';show(null);};$('#b-end').onclick=()=>{state='play';finish(false);};$('#b-quit').onclick=()=>{state='play';finish(true);};
 $('#b-mute1').onclick=()=>{audioInit();setMute(!muted);};$('#b-mute2').onclick=()=>setMute(!muted);
@@ -856,8 +873,10 @@ const vF=new THREE.Vector3(),vH=new THREE.Vector3();
 function placeCam(snap,dt=.016){
  if(G.foot){const f=vF.set(Math.sin(G.fh),0,Math.cos(G.fh));trimCam.visible=view==='fp';if(footFig){footFig.position.set(G.fx,0,G.fz);footFig.rotation.y=G.fh;footFig.visible=view!=='fp';}
   if(view==='fp'){cam.position.set(G.fx,1.62+Math.sin(uT.value*9)*.01*Math.min(1,Math.abs(G.fv||0)),G.fz);const look=new THREE.Vector3(G.fx,.2,G.fz).addScaledVector(f,4.5);camLook.copy(look);cam.lookAt(look);return;}
+  if(view==='top'){const want=new THREE.Vector3(G.fx,11,G.fz+5),k=snap?1:1-Math.exp(-dt*4);cam.position.lerp(want,k);camLook.lerp(new THREE.Vector3(G.fx,0,G.fz),k);cam.lookAt(camLook);return;}
   const want=new THREE.Vector3(G.fx,2.6,G.fz).addScaledVector(f,-3.8),look=new THREE.Vector3(G.fx,.6,G.fz).addScaledVector(f,1.5),k=snap?1:1-Math.exp(-dt*4);cam.position.lerp(want,k);camLook.lerp(look,k);cam.lookAt(camLook);return;}
  trimCam.visible=false;const f=vF.set(Math.sin(G.h),0,Math.cos(G.h));
+ if(view==='top'){const port=innerHeight>innerWidth,want=new THREE.Vector3(G.x,port?16:12,G.z+(port?4:5.5)),look=new THREE.Vector3(G.x,0,G.z),k=snap?1:1-Math.exp(-dt*4);cam.position.lerp(want,k);camLook.lerp(look,k);cam.lookAt(camLook);return;}
  if(view==='fp'&&state!=='phone'){mower.updateMatrixWorld();vH.copy(mower.userData.head).applyMatrix4(mower.matrixWorld);
   const vib=G.engine?(Math.sin(uT.value*60)*.006+(G.blades?Math.sin(uT.value*83)*.004:0)+(G.vib&&G.blades?Math.sin(uT.value*47)*.02:0)):0;cam.position.set(vH.x,vH.y+vib,vH.z);
   const look=new THREE.Vector3(vH.x,vH.y-1.15,vH.z).addScaledVector(f,7);if(G.shake>0){look.x+=(Math.random()-.5)*G.shake*2;look.y+=(Math.random()-.5)*G.shake*2;G.shake=Math.max(0,G.shake-dt*1.6);}
@@ -868,7 +887,7 @@ function placeCam(snap,dt=.016){
  if(G.shake>0){cam.position.x+=(Math.random()-.5)*G.shake;cam.position.y+=(Math.random()-.5)*G.shake;G.shake=Math.max(0,G.shake-dt*1.6);}
  cam.lookAt(camLook);}
 function fade(dt){const tx_=G.foot?G.fx:G.x,tz_=G.foot?G.fz:G.z,cx=cam.position.x,cz=cam.position.z,vx=tx_-cx,vz=tz_-cz,l2=vx*vx+vz*vz||1;
- for(const t of fadeTrees){const u=Math.max(0,Math.min(1,((t.x-cx)*vx+(t.z-cz)*vz)/l2)),d=Math.hypot(cx+vx*u-t.x,cz+vz*u-t.z),want=view==='tp'&&d<2.4&&u>.05&&u<.97?.25:1;
+ for(const t of fadeTrees){const u=Math.max(0,Math.min(1,((t.x-cx)*vx+(t.z-cz)*vz)/l2)),d=Math.hypot(cx+vx*u-t.x,cz+vz*u-t.z),want=view!=='fp'&&d<2.4&&u>.05&&u<.97?.25:1;
   if(Math.abs(t.f-want)<.01)continue;t.f+=(want-t.f)*Math.min(1,dt*6);t.parts.forEach(m=>{m.material.opacity=t.f;m.material.depthWrite=t.f>.9;});}}
 const hit=(o,dist)=>(G.x-o.x)**2+(G.z-o.z)**2<dist*dist;
 const SOLID={tree:1,bale:1,bench:1,lamp:1,fountain:1,shrub:1,statue:1};
@@ -888,8 +907,10 @@ function vanStep(dt){const V=G.van;if(!V)return;V.t+=dt;const k=Math.min(1,V.t/6
  else if(!V.done){V.done=true;vanDriver.visible=false;if(V.fits){installPart(V.p);sfx('ding');pop('UDC delivery: '+V.p.pn+' installed');toast('Delivered and installed '+V.p.pn+'. Back to work!','good');}else{sfx('bad');G.time=Math.max(3,G.time-10);toast('Delivered '+V.p.pn+', but it is not listed for your '+mname(AM())+'. Check the part number!','bad');}}
  else{const k2=Math.min(1,(V.t-8)/5);van.position.lerpVectors(vanB,vanC,k2*k2);if(k2>=1){van.visible=false;G.van=null;}}
  if(V&&V.t>.1&&V.t<.2&&!V.hint){V.hint=1;}}
+function endIntro(){if(G.intro>0){G.intro=0;$('#bubble').hidden=true;placeCam(true);}}
 function step(dt){
  const dk=DECKS[AM().deck];
+ if(G.intro>0){G.intro-=dt;const c=clientFig.position,t=Math.min(1,(4.5-G.intro)/4.5);cam.position.set(c.x+.6-t*.4,1.55+t*.3,c.z+2.7+t*1.2);cam.lookAt(c.x,1.35,c.z);if(G.intro<=0)endIntro();return;}
  if(G.crank>0){G.crank-=dt;if(G.crank<=0){G.engine=true;$('#b-key').classList.remove('crank');toast(G.job.tut&&!G.tipK?'Engine running. Set the deck height, then BLADES (Space).':'Engine running.','good');G.tipK=1;hud();}}
  G.time-=dt;
  const inp={th:(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)-joy.y,sr:(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0)+joy.x};
@@ -906,7 +927,7 @@ function step(dt){
  if(!G.engine)inp.th=0;
  let vmax=G.blades?dk.v:dk.v*1.25;if(obs.some(o=>o.k==='bunker'&&hit(o,o.r)))vmax*=.45;if(G.thirst>=95)vmax*=.6;if(G.rush>0)vmax*=1.15;
  const tgt=inp.th>0?inp.th*vmax:inp.th*vmax*.5;G.v+=(tgt-G.v)*Math.min(1,dt*2.6);
- G.h-=inp.sr*dk.t*dt*(G.v<-.05?-1:1)*Math.min(1,.35+Math.abs(G.v)/3);
+ if(AM().ztr)G.h-=inp.sr*2.5*dt;else G.h-=inp.sr*dk.t*dt*(G.v<-.05?-1:1)*Math.min(1,.35+Math.abs(G.v)/3);
  const px=G.x,pz=G.z;G.x+=Math.sin(G.h)*G.v*dt;G.z+=Math.cos(G.h)*G.v*dt;
  for(const o of obs){
   if((SOLID[o.k]||(o.k==='gnome'&&!o.hit))&&hit(o,o.r+.75)){
@@ -975,15 +996,15 @@ function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;uT.value+=dt
  if(state==='play')step(dt);
  else if(state==='phone'){if(drag===null)mower.rotation.y+=dt*.3;const port=innerWidth<=700,mz=z0+J.h+6;cam.fov=port?60:50;cam.updateProjectionMatrix();
   if(port){cam.position.set(0,3.2,mz+5.8);cam.lookAt(0,-1.4,mz);}else{cam.position.set(2.4,2.5,mz+6.2);cam.lookAt(2.4,.5,mz);}}
- else if(state==='title'){orbit+=dt*.08;const r=Math.max(J.w,J.h)*.95;cam.position.set(Math.cos(orbit)*r,r*.5,Math.sin(orbit)*r);cam.lookAt(0,0,0);}
+ else if(state==='title'){orbit+=dt*.15;const pz=z0+J.h+6,port=innerWidth<=700;cam.fov=port?62:48;cam.updateProjectionMatrix();cam.position.set(Math.sin(orbit)*2.2,port?3.2:2.3,pz+(port?8.8:6.4));cam.lookAt(Math.sin(orbit)*.8,port?.3:1.05,pz-2);}
  for(let i=0;i<NP;i++){if(pLife[i]<=0)continue;pLife[i]-=dt;const j=i*3;pVel[j+1]-=pGrav[i]*dt;pPos[j]+=pVel[j]*dt;pPos[j+1]+=pVel[j+1]*dt;pPos[j+2]+=pVel[j+2]*dt;if(pPos[j+1]<.02||pLife[i]<=0){pPos[j+1]=-50;pLife[i]=0;}}
  pGeo.attributes.position.needsUpdate=true;pGeo.attributes.color.needsUpdate=true;
  if(flag)flag.rotation.y=Math.sin(uT.value*3)*.35;
  R.render(S,cam);requestAnimationFrame(frame);}
 function resize(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.fov=state==='play'&&view==='fp'?72:w<h?66:55;cam.updateProjectionMatrix();joyHome();}
 addEventListener('resize',resize);
-loadWorld(HOME,true);buildMower(SV?AM():MOWERS[0],SV?paintOf(SV.active):PAINTS[0][1]);parkMower();G={x:0,z:0,h:0,v:0};resize();requestAnimationFrame(frame);
-if(document.fonts&&document.fonts.load)document.fonts.load('64px Michroma').then(()=>{if(state==='title'||state==='phone'){loadWorld(HOME,true);buildMower(SV?AM():MOWERS[0],SV?paintOf(SV.active):PAINTS[0][1]);parkMower();}}).catch(()=>{});
+loadWorld(HOME,true);buildMower(SV?AM():MW_.jd42,SV?paintOf(SV.active):PAINTS[0][1]);parkMower();G={x:0,z:0,h:0,v:0};resize();requestAnimationFrame(frame);
+if(document.fonts&&document.fonts.load)document.fonts.load('64px Michroma').then(()=>{if(state==='title'||state==='phone'){loadWorld(HOME,true);buildMower(SV?AM():MW_.jd42,SV?paintOf(SV.active):PAINTS[0][1]);parkMower();}}).catch(()=>{});
 window.__game={get state(){return state},get G(){return G},get SV(){return SV},get cov(){return total?cutN/total*100:0},finish,openShed,openPhone,startJob,keys};
 }
 </script>
