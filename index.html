@@ -276,6 +276,8 @@ form.mail input{flex:1 1 200px;font:inherit;font-size:16px;padding:10px 12px;bor
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
 <script>
 {
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -312,10 +314,10 @@ const PRODUCTS=[
 const P={};PRODUCTS.forEach(([pn,id,t,name,spec,price])=>P[pn]={pn,id,t,name,spec,price,kind:t==='belt'?'belt':'blades'});
 // fits come only from listing names; stats are game stats by deck size
 const MOWERS=[
- {id:'tb42',brand:'Troy-Bilt',model:'Pony 42',deck:42,price:0,belt:['954-04060C'],blades:['942-04308'],st:{L:1.55,W:.9,rw:.34,fw:.23,hood:'box'},note:'Used, from a garage sale'},
+ {id:'tb42',brand:'Troy-Bilt',model:'Pony 42',deck:42,price:650,belt:['954-04060C'],blades:['942-04308'],st:{L:1.55,W:.9,rw:.34,fw:.23,hood:'box'}},
  {id:'cr42',brand:'Craftsman',model:'42" deck',deck:42,price:650,belt:['144959'],blades:['138971','134149'],st:{L:1.7,W:.92,rw:.35,fw:.24,hood:'wedge'}},
  {id:'cc42',brand:'Cub Cadet',model:'XT1 LT42',deck:42,price:750,belt:['954-05021'],blades:['942-0616A','942-04308'],st:{L:1.7,W:.95,rw:.36,fw:.24,hood:'box',fender:true}},
- {id:'jd42',brand:'John Deere',model:'42" deck',deck:42,price:950,belt:['GX20072'],blades:['GX22151'],st:{L:1.75,W:.96,rw:.37,fw:.25,hood:'round'}},
+ {id:'jd42',brand:'John Deere',model:'42" deck',deck:42,price:0,belt:['GX20072'],blades:['GX22151'],st:{L:1.75,W:.96,rw:.37,fw:.25,hood:'round'},model3d:'mower-s100',note:'Used, from a garage sale'},
  {id:'hq46',brand:'Husqvarna',model:'46" deck',deck:46,price:1600,belt:['405143'],blades:['405380'],st:{L:1.82,W:1,rw:.38,fw:.25,hood:'round',fender:true}},
  {id:'cc54',brand:'Cub Cadet',model:'XT2 54"',deck:54,price:2400,belt:['954-05025A'],blades:['942-0677B','742P05086','742-0677-X'],st:{L:2.0,W:1.1,rw:.44,fw:.27,hood:'box',fender:true},confirm:'blades'},
  {id:'hq54',brand:'Husqvarna',model:'54" deck',deck:54,price:2800,belt:['196103'],blades:['187256'],st:{L:2.02,W:1.1,rw:.45,fw:.28,hood:'wedge',fender:true,exhaust:true}}
@@ -352,7 +354,7 @@ const TIERS=[{t:'yard',rep:0,n:'Neighbors'},{t:'farm',rep:6,n:'Farm fields'},{t:
 
 // ---------- save ----------
 const ls={get(k,d){try{const v=localStorage.getItem('udcmow-'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('udcmow-'+k,JSON.stringify(v))}catch(e){}}};
-const fresh=()=>({v:3,cash:120,day:1,rep:0,jobs:0,stars:0,bagger:false,diag:0,pf:'',weekly:null,owned:['tb42'],active:'tb42',paint:{},cond:{tb42:{belt:42,sharp:58,hours:312,beltPn:'954-04060C',bladePn:'942-04308'}},inv:{},drinks:{water:2,tea:1},offers:null,offDay:0,earned:0});
+const fresh=()=>({v:3,cash:120,day:1,rep:0,jobs:0,stars:0,bagger:false,diag:0,pf:'',weekly:null,owned:['jd42'],active:'jd42',paint:{},cond:{jd42:{belt:42,sharp:58,hours:312,beltPn:'GX20072',bladePn:'GX22151'}},inv:{},drinks:{water:2,tea:1},offers:null,offDay:0,earned:0});
 let SV=ls.get('career',null);if(!SV||SV.v!==3)SV=null;if(SV&&!SV.drinks)SV.drinks={water:2,tea:1};if(SV){if(SV.bagger===undefined)SV.bagger=false;if(!SV.diag)SV.diag=0;}
 const save=()=>ls.set('career',SV);
 function cond(id){if(!SV.cond[id])SV.cond[id]={belt:100,sharp:100,hours:0};const c=SV.cond[id],m=MW_[id];if(!c.beltPn)c.beltPn=m.belt[0];if(!c.bladePn)c.bladePn=m.blades[0];return c;}
@@ -390,6 +392,14 @@ const hemi=new THREE.HemisphereLight('#eef8ff','#41602c',.62);S.add(hemi);
 const sun=new THREE.DirectionalLight('#fff2d4',.78);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-30,right:30,top:30,bottom:-30,near:1,far:110});S.add(sun);
 const ph=(c,o={})=>new THREE.MeshPhongMaterial(Object.assign({color:c,shininess:8,flatShading:true},o));
 const lam=c=>new THREE.MeshLambertMaterial({color:c});
+// ---------- 3D models (assets/models/*.glb, from Higgsfield) ----------
+const MPATH='assets/models/',MODELS={},MIX=[];
+function loadModel(n){if(!MODELS[n])MODELS[n]=new Promise(res=>{if(!THREE.GLTFLoader)return res(null);try{new THREE.GLTFLoader().load(MPATH+n+'.glb',g=>{g.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.encoding=THREE.LinearEncoding;if('metalness' in m){m.metalness=0;m.roughness=Math.max(.55,m.roughness||.6);}m.needsUpdate=true;});}});res(g);},undefined,()=>res(null));}catch(e){res(null);}});return MODELS[n];}
+function spawnModel(n,parent,x,y,z,ry,scale=1){const h=new THREE.Group();h.position.set(x,y,z);h.rotation.y=ry||0;parent.add(h);
+ h.userData.ready=loadModel(n).then(g=>{if(!g||!h.parent)return null;const o=(g.animations.length&&THREE.SkeletonUtils)?THREE.SkeletonUtils.clone(g.scene):g.scene.clone();o.scale.setScalar(scale);h.add(o);
+  if(g.animations.length){const mx=new THREE.AnimationMixer(o);mx.clipAction(g.animations[0]).play();mx.update(Math.random()*3);MIX.push({mx,h});}return o;});return h;}
+const CLIENT_MODEL={yard:['kowalski','neighbor-woman'],farm:['hank'],park:['park-manager'],estate:['ashford'],golf:['dale'],stadium:['park-manager']};
+['mower-s100','hero'].forEach(loadModel);
 function mk(geo,mat,x,y,z,par,shadow=true){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=shadow;(par||world).add(m);return m;}
 S.add(cam);const bottle=new THREE.Group(),bottleMat=new THREE.MeshPhongMaterial({color:'#9fd3ff',transparent:true,opacity:.9,shininess:90});bottle.add(new THREE.Mesh(new THREE.CylinderGeometry(.03,.034,.15,14),bottleMat));{const cp=new THREE.Mesh(new THREE.CylinderGeometry(.016,.02,.035,10),new THREE.MeshPhongMaterial({color:'#f4f4f4'}));cp.position.y=.09;bottle.add(cp);}bottle.visible=false;cam.add(bottle);
 const trimCam=new THREE.Group();{const sh=new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,1.2,6),new THREE.MeshPhongMaterial({color:'#e5482d'}));sh.rotation.x=1.05;sh.position.set(.2,-.55,-.65);trimCam.add(sh);const hd=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.06,14),new THREE.MeshPhongMaterial({color:'#2b2f2d'}));hd.position.set(.2,-1.02,-1.12);trimCam.add(hd);}trimCam.visible=false;cam.add(trimCam);
@@ -439,13 +449,17 @@ function buildMower(m,paint){
  for(const [x,z,r,wd] of [[W*.65,-L*.29,rw,.3],[-W*.65,-L*.29,rw,.3],[W*.55,L*.4,fw,.22],[-W*.55,L*.4,fw,.22]]){const w=add(new THREE.CylinderGeometry(r,r,wd,16),k,x,r,z);w.rotation.z=Math.PI/2;w.add(new THREE.Mesh(new THREE.CylinderGeometry(r*.35,r*.35,wd+.02,8),hub));w.userData.r=r;wheels.push(w);}
  if(s.fender)for(const sx of[-1,1])add(new THREE.BoxGeometry(.34,.06,rw*1.6),body,sx*W*.65,rw*2+.05,-L*.29);
  if(s.exhaust){add(new THREE.CylinderGeometry(.05,.05,.5,8),k,W*.38,by+.55,L*.3);exhaustPt=new THREE.Vector3(W*.38,by+.82,L*.3);}else exhaustPt=null;
- if(SV&&SV.bagger){for(const sx of[-.27,.27])add(new THREE.BoxGeometry(.5,.62,.5),k,sx,by+.2,-L/2-.32);const ch=add(new THREE.CylinderGeometry(.09,.09,1.2,8),k,-W*.56,by-.05,-L*.18);ch.rotation.x=1.25;}
+ if(SV&&SV.bagger){for(const sx of[-.27,.27])add(new THREE.BoxGeometry(.5,.62,.5),k,sx,by+.2,-L/2-.32).userData.keep=1;const ch=add(new THREE.CylinderGeometry(.09,.09,1.2,8),k,-W*.56,by-.05,-L*.18);ch.rotation.x=1.25;ch.userData.keep=1;}
  const dr=person('#2d6fd1','#39404a',BRAND,'#e7b38a');dr.position.set(0,by-.45,-.38);dr.children.slice(0,2).forEach(l=>{l.rotation.x=-1.3;l.position.set(l.position.x,.55,.28);});
  dr.children.slice(3,5).forEach(a=>{a.rotation.x=-.9;a.position.z=.2;});mower.add(dr);mower.userData.driver=dr;
  const dm=new THREE.MeshBasicMaterial({map:decalTex(paint)});
  for(const sx of[-1,1]){const d=add(new THREE.PlaneGeometry(.95,.24),dm,sx*(W/2+.003),by,-.1);d.rotation.y=sx*Math.PI/2;d.castShadow=false;}
  const top=add(new THREE.PlaneGeometry(.55,.14),dm,0,by+.215,-.05);top.rotation.x=-Math.PI/2;top.castShadow=false;
- mower.userData.head=new THREE.Vector3(0,by+1.32,-.52);DECK=DECKS[m.deck].r;}
+ mower.userData.head=new THREE.Vector3(0,by+1.32,-.52);DECK=DECKS[m.deck].r;
+ const proc=mower.children.slice(),tok=(buildMower.tok=(buildMower.tok||0)+1);
+ const hero=spawnModel('hero',mower,0,m.model3d?.3:by-.2,m.model3d?-.28:-.42,0);hero.visible=false;
+ hero.userData.ready.then(o=>{if(!o||tok!==buildMower.tok)return;const wasVis=dr.visible;dr.visible=false;hero.visible=wasVis;mower.userData.driver=hero;});
+ if(m.model3d){const mm=spawnModel(m.model3d,mower,0,0,.05,Math.PI/2,1.92);mm.userData.ready.then(o=>{if(!o||tok!==buildMower.tok)return;proc.forEach(c=>{if(c!==dr&&!c.userData.keep)c.visible=false;});wheels=[];swheel=null;mower.userData.head.set(0,1.74,-.5);});}}
 
 // ---------- particles ----------
 const NP=560,pPos=new Float32Array(NP*3),pCol=new Float32Array(NP*3),pVel=new Float32Array(NP*3),pLife=new Float32Array(NP),pGrav=new Float32Array(NP);let pI=0;
@@ -526,8 +540,9 @@ function loadWorld(job,home){
  if(th==='golf'){building(0,z0-9,14,4,7,'#f7f5ef',BRAND);}
  for(let k=0;k<46;k++){const a=rnd()*6.28,rr=Math.max(w,h)/2+5+rnd()*22,x=Math.cos(a)*rr,z=Math.sin(a)*rr;if(z<z0-2&&Math.abs(x)<16)continue;if(home&&z>z0+h+1&&z<z0+h+11&&Math.abs(x)<8)continue;tree(x,z,.9+rnd()*.7,th==='golf'||th==='estate'||rnd()>.7);}
  // client waiting outside the lawn
- clientFig=null;if(!home&&!job.tut){const cr=mkRng(job.seed+5),c=person(pick(['#e5482d','#7a5cc9','#2a8f6a','#d9a12b','#f4f4f4'],cr),pick(['#39404a','#5b4636','#2f3f66'],cr),cr()>.5?'#3d3d3d':null,pick(['#e7b38a','#c68c63','#8d5a3b','#f1c9a5'],cr));
-  c.position.set(x0+w*.3,0,z0-2.4);world.add(c);clientFig=c;}
+ clientFig=null;if(!home&&!job.tut&&!job.practice){const cr=mkRng(job.seed+5),list=CLIENT_MODEL[job.theme]||['kowalski'],cm=job.client==='Mrs. Kowalski'?'kowalski':pick(list,cr);
+  clientFig=spawnModel(cm,world,x0+w*.3,0,z0-2.4,0);
+  if(job.rival){const rv=spawnModel('rival',world,x0+w*.3+1.6,0,z0-2.9,-.4);}}
  nx=Math.ceil(w/C);nz=Math.ceil(h/C);st=new Uint8Array(nx*nz);hs=new Uint8Array(nx*nz);inst=new Int32Array(nx*nz).fill(-1);total=0;
  const PADS={tree:.25,bale:.15,bed:.1,gnome:.05,bunker:0,green:0,bench:.1,lamp:.1,fountain:.1,shrub:.15,statue:.15};
  const blocked=(x,z)=>obs.some(o=>PADS[o.k]!==undefined&&(x-o.x)**2+(z-o.z)**2<(o.r+PADS[o.k])**2);
@@ -564,7 +579,7 @@ function loadWorld(job,home){
   van.rotation.y=-Math.PI/2;van.visible=false;world.add(van);
   vanA=new THREE.Vector3(x0+w+30,0,z0+h+5.2);vanB=new THREE.Vector3(x0+w+2.5,0,z0+h+5.2);vanC=new THREE.Vector3(x0-30,0,z0+h+5.2);
   mk(new THREE.PlaneGeometry(90,4),lam('#555a5c'),0,.016,z0+h+5.2,null,false).rotation.x=-Math.PI/2;
-  vanDriver=person(BRAND,'#bfccc9',BRAND,'#8d5a3b');vanDriver.position.set(x0+w+1.2,0,z0+h+3.3);vanDriver.rotation.y=Math.PI;vanDriver.visible=false;world.add(vanDriver);
+  vanDriver=spawnModel('udc-driver',world,x0+w+1.2,0,z0+h+3.3,Math.PI);vanDriver.visible=false;
   footFig=person(BRAND,'#c2b08a',BRAND,'#8d5a3b');const sh=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,1.4,6),ph('#e5482d'));sh.position.set(.25,.75,.35);sh.rotation.x=.9;footFig.add(sh);footFig.visible=false;world.add(footFig);
   const picks=seasonPicks(job.season),bp=[picks[0],P[AM().belt[0]]];
   [[x0-7.5,z0+h*.45,Math.PI/2],[x0+w+7.5,z0+h*.45,-Math.PI/2]].forEach(([bx,bz,ry],i)=>billboard(bx,bz,ry,bp[i]||picks[0]));
@@ -956,6 +971,7 @@ function mini(){const W=236,s=Math.min(W/J.w,W/J.h)*.92,ox=(W-J.w*s)/2,oz=(W-J.h
 
 let last=performance.now();
 function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;uT.value+=dt;musicTick();
+ for(let i=MIX.length-1;i>=0;i--){let p=MIX[i].h,on=false;while(p){if(p===S){on=true;break;}p=p.parent;}if(!on){MIX.splice(i,1);continue;}if(MIX[i].h.visible)MIX[i].mx.update(dt);}
  if(state==='play')step(dt);
  else if(state==='phone'){if(drag===null)mower.rotation.y+=dt*.3;const port=innerWidth<=700,mz=z0+J.h+6;cam.fov=port?60:50;cam.updateProjectionMatrix();
   if(port){cam.position.set(0,3.2,mz+5.8);cam.lookAt(0,-1.4,mz);}else{cam.position.set(2.4,2.5,mz+6.2);cam.lookAt(2.4,.5,mz);}}
