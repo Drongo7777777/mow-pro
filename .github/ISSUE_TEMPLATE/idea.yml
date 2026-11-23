@@ -1,0 +1,30 @@
+name: Идея / фидбек
+description: Что улучшить, что скучно, что понравилось
+title: "[Идея] "
+labels: [idea]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: О чём
+      options:
+        - Геймплей / механика
+        - Управление
+        - Графика / модели
+        - Звук / радио
+        - Телефон (Jobs, Store, Garage)
+        - Баланс (деньги, время, износ)
+        - Другое
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Идея или впечатление
+    validations:
+      required: true
+  - type: dropdown
+    id: fun
+    attributes:
+      label: Насколько интересно играть сейчас
+      options: ["5 — не оторваться", "4 — интересно", "3 — нормально", "2 — скучновато", "1 — бросил"]

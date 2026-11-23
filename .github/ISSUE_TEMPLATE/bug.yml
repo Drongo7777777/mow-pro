@@ -1,0 +1,38 @@
+name: Баг
+description: Что-то сломалось или работает не так
+title: "[Баг] "
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: Что случилось
+      description: Что вы делали и что пошло не так
+      placeholder: "Взял заказ на ферме, нажал Shed, кнопки не реагируют"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Что ожидали
+  - type: dropdown
+    id: device
+    attributes:
+      label: Устройство
+      options:
+        - Компьютер (Chrome)
+        - Компьютер (Safari / другой)
+        - iPhone
+        - Android
+    validations:
+      required: true
+  - type: input
+    id: level
+    attributes:
+      label: Где в игре
+      placeholder: "День 4, City park, Cub Cadet XT2 54"
+  - type: textarea
+    id: shots
+    attributes:
+      label: Скриншот или видео
+      description: Перетащите файл сюда

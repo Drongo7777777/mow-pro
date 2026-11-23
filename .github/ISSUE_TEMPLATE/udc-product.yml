@@ -1,0 +1,28 @@
+name: Товар UDC в игре
+description: Добавить или поправить деталь, совместимость или косилку
+title: "[Товар] "
+labels: [product]
+body:
+  - type: input
+    id: pn
+    attributes:
+      label: Партномер UDC
+      placeholder: "954-05025A"
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Ссылка на листинг (Walmart / Amazon / udcparts.com)
+  - type: input
+    id: fits
+    attributes:
+      label: Под какие косилки подходит (как в листинге)
+      placeholder: "Cub Cadet XT1 / XT2, дека 54 дюйма"
+    validations:
+      required: true
+  - type: textarea
+    id: note
+    attributes:
+      label: Как показать в игре
+      placeholder: "Апгрейд на осень, рекламный щит, вопрос для диагностики…"
