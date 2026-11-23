@@ -70,7 +70,7 @@ p{margin:.5em 0}.mut{color:var(--mut)}.small{font-size:13px}
 .who b{font-size:14px}.who small{font-size:11px;color:var(--mut)}
 .who.on{border-color:var(--y);background:rgba(255,194,26,.12)}.who.add{border-style:dashed}
 #who-f{display:flex;gap:8px;margin-top:8px}#who-f input{flex:1;min-width:0;border-radius:10px;border:1px solid var(--line);background:#0e1d18;color:#fff;padding:10px 12px;font-size:16px}
-#b-play:disabled{opacity:.55}
+#who-n.need{border-color:var(--y);animation:shake .35s}@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .adban{display:block;margin:0 0 12px;border-radius:12px;overflow:hidden;line-height:0}.adban img{width:100%;height:auto;display:block}
 .rq{font-size:12px;font-weight:700;background:rgba(223,230,228,.1);border-radius:999px;padding:3px 9px;white-space:nowrap}
 .rq.hot{background:rgba(255,194,26,.18);color:var(--y)}
@@ -371,7 +371,6 @@ const TIERS=[{t:'yard',rep:0,n:'Neighbors'},{t:'farm',rep:6,n:'Farm fields'},{t:
 const ls={get(k,d){try{const v=localStorage.getItem('udcmow-'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('udcmow-'+k,JSON.stringify(v))}catch(e){}}};
 const fresh=()=>({v:3,cash:120,day:1,rep:0,jobs:0,stars:0,bagger:false,diag:0,pf:'',weekly:null,owned:['jd42'],active:'jd42',paint:{},cond:{jd42:{belt:42,sharp:58,hours:312,beltPn:'GX20072',bladePn:'GX22151'}},inv:{},drinks:{water:2,tea:1},offers:null,offDay:0,earned:0});
 // Player profiles: each tester has a name and a separate career on this device.
-// A link like ?player=Anna opens (or creates) Anna's profile directly.
 let PLAYERS=ls.get('players',null),CUR=ls.get('cur',null);
 if(!PLAYERS){PLAYERS=[];const old=ls.get('career',null);if(old&&old.v===3){PLAYERS.push({id:'p1',name:'Player 1'});ls.set('career:p1',old);CUR='p1';}ls.set('players',PLAYERS);ls.set('cur',CUR);}
 const cleanName=n=>String(n||'').replace(/[<>&"']/g,'').trim().slice(0,18);
@@ -380,7 +379,6 @@ const coName=()=>{const p=curPlayer();return p?p.name+'’s Lawn Co.':'UDC Lawn 
 function addPlayer(name){name=cleanName(name);if(!name)return null;let p=PLAYERS.find(q=>q.name.toLowerCase()===name.toLowerCase());
  if(!p){p={id:'p'+Date.now().toString(36)+Math.floor(Math.random()*1e4),name};PLAYERS.push(p);ls.set('players',PLAYERS);}return p;}
 function loadCareer(){let v=CUR?ls.get('career:'+CUR,null):null;if(!v||v.v!==3)v=null;if(v&&!v.drinks)v.drinks={water:2,tea:1};if(v){if(v.bagger===undefined)v.bagger=false;if(!v.diag)v.diag=0;}return v;}
-{const q=new URLSearchParams(location.search).get('player');if(q){const p=addPlayer(q);if(p){CUR=p.id;ls.set('cur',CUR);}}}
 let SV=loadCareer();
 const save=()=>{if(CUR)ls.set('career:'+CUR,SV);};
 function cond(id){if(!SV.cond[id])SV.cond[id]={belt:100,sharp:100,hours:0};const c=SV.cond[id],m=MW_[id];if(!c.beltPn)c.beltPn=m.belt[0];if(!c.bladePn)c.bladePn=m.blades[0];return c;}
@@ -896,18 +894,22 @@ blurClick('#b-key',keyTurn);blurClick('#b-trim',toggleTrim);blurClick('#b-radio'
 $('#b-finish').onclick=()=>finish(false);$('#b-pause').onclick=pause;
 $('#b-resume').onclick=()=>{state='play';show(null);};$('#b-end').onclick=()=>{state='play';finish(false);};$('#b-quit').onclick=()=>{state='play';finish(true);};
 $('#b-mute1').onclick=()=>{audioInit();setMute(!muted);};$('#b-mute2').onclick=()=>setMute(!muted);
-function renderWho(){const p=curPlayer(),W=$('#who');
+function renderWho(){const p=curPlayer(),W=$('#who'),first=!PLAYERS.length;
  const sum=id=>{const v=ls.get('career:'+id,null);return v&&v.v===3?`Day ${v.day} · ${money(v.cash)} · rep ${v.rep}`:'new';};
- W.innerHTML=`<div class="who-h">Who's playing?</div><div class="who-list">${PLAYERS.map(q=>`<button class="who${q.id===CUR?' on':''}" data-pid="${q.id}"><b>${q.name}</b><small>${sum(q.id)}</small></button>`).join('')}
-  <button class="who add" data-pid="+"><b>+ New player</b><small>own career</small></button></div>
-  <form id="who-f" hidden><input id="who-n" maxlength="18" placeholder="Your name" autocomplete="off"><button class="btn sm">Add</button></form>`;
- const b=$('#b-play'),n=$('#b-new');b.disabled=!p;n.hidden=!SV;delete n.dataset.sure;n.textContent='New career';
- b.textContent=!p?'Pick or add a player':SV?`Continue as ${p.name}`:`Start as ${p.name}`;}
+ W.innerHTML=first?`<div class="who-h">Enter your name to start your own career</div>
+  <form id="who-f"><input id="who-n" maxlength="18" placeholder="Your name" autocomplete="off" enterkeyhint="go"></form>`
+ :`<div class="who-h">Who's playing?</div><div class="who-list">${PLAYERS.map(q=>`<button class="who${q.id===CUR?' on':''}" data-pid="${q.id}"><b>${q.name}</b><small>${sum(q.id)}</small></button>`).join('')}
+  <button class="who add" data-pid="+"><b>+ I'm new</b><small>enter your name</small></button></div>
+  <form id="who-f" hidden><input id="who-n" maxlength="18" placeholder="Your name" autocomplete="off" enterkeyhint="go"><button class="btn sm">Add</button></form>`;
+ const b=$('#b-play'),n=$('#b-new');n.hidden=!SV;delete n.dataset.sure;n.textContent='New career';
+ b.textContent=first||!p?'Start career':SV?`Continue as ${p.name}`:`Start as ${p.name}`;}
 function pickPlayer(id){CUR=id;ls.set('cur',CUR);SV=loadCareer();renderWho();if(state==='title'){buildMower(SV?AM():MW_.jd42,SV?paintOf(SV.active):PAINTS[0][1]);parkMower();}}
 $('#who').onclick=e=>{const t=e.target.closest('[data-pid]');if(!t)return;
  if(t.dataset.pid==='+'){$('#who-f').hidden=false;$('#who-n').focus();return;}pickPlayer(t.dataset.pid);};
-$('#who').onsubmit=e=>{e.preventDefault();const p=addPlayer($('#who-n').value);if(p)pickPlayer(p.id);};
-$('#b-play').onclick=()=>{if(!curPlayer())return;audioInit();if(!SV){SV=fresh();save();}openPhone('jobs');};
+function nameNeeded(){const f=$('#who-f'),i=$('#who-n');if(f.hidden)f.hidden=false;i.classList.remove('need');void i.offsetWidth;i.classList.add('need');i.focus();}
+function play(){if(!curPlayer()){nameNeeded();return;}audioInit();if(!SV){SV=fresh();save();}openPhone('jobs');}
+$('#who').onsubmit=e=>{e.preventDefault();const first=!PLAYERS.length,p=addPlayer($('#who-n').value);if(!p){nameNeeded();return;}pickPlayer(p.id);if(first)play();};
+$('#b-play').onclick=()=>{const i=$('#who-n'),f=$('#who-f');if(i&&f&&!f.hidden){if(!cleanName(i.value)){nameNeeded();return;}pickPlayer(addPlayer(i.value).id);}play();};
 $('#b-new').onclick=()=>{if($('#b-new').dataset.sure){SV=fresh();save();audioInit();openPhone('jobs');}else{$('#b-new').dataset.sure=1;$('#b-new').textContent='Tap again to erase this career';}};
 renderWho();
 
