@@ -64,6 +64,7 @@ p{margin:.5em 0}.mut{color:var(--mut)}.small{font-size:13px}
 .job .pay{font-weight:900;color:var(--y);font-size:20px;white-space:nowrap}
 .job q{display:block;font-size:14px;color:var(--mut);margin:6px 0;quotes:none}
 .reqs{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.adban{display:block;margin:0 0 12px;border-radius:12px;overflow:hidden;line-height:0}.adban img{width:100%;height:auto;display:block}
 .rq{font-size:12px;font-weight:700;background:rgba(223,230,228,.1);border-radius:999px;padding:3px 9px;white-space:nowrap}
 .rq.hot{background:rgba(255,194,26,.18);color:var(--y)}
 .tier{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:14px;padding:6px 0;border-bottom:1px solid var(--line)}
@@ -501,6 +502,16 @@ function billboard(x,z,ry,p,logoOnly){const cv=document.createElement('canvas');
  if(logoOnly)drawLogo(c,BRAND,92,110,840,tex);else{drawLogo(c,BRAND,40,30,420,tex);c.fillStyle='#17201a';c.font='700 72px Rubik, Arial';c.fillText(p.pn,40,255);c.font='500 44px Rubik, Arial';wrapText(c,p.name,40,320,940,52);}
  c.fillStyle='#dfe6e4';c.font='700 42px Rubik, Arial';c.fillText('udcparts.com',40,490);tex.needsUpdate=true;
  const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;world.add(g);mk(new THREE.PlaneGeometry(6,3),new THREE.MeshBasicMaterial({map:tex}),0,3.6,0,g,false);mk(new THREE.BoxGeometry(6.2,3.2,.12),ph('#2b2f2d'),0,3.6,-.08,g);for(const sx of[-2.2,2.2])mk(new THREE.CylinderGeometry(.1,.12,2.2,8),ph('#2b2f2d'),sx,1.1,-.1,g);}
+// Test banners from the UDC team (assets/banners). Left roadside board per location, fence banners, stadium boards.
+const BN='assets/banners/',BANNER_AT={home:'belts-promo',yard:'hero-parts',farm:'hero-rider',park:'hero-deck',estate:'parts-lineup',golf:'belts-promo',stadium:'hero-parts'};
+const texLoader=new THREE.TextureLoader();
+function bTex(f){const t=texLoader.load(BN+f+'.jpg');t.anisotropy=4;return t;}
+function photoBoard(x,z,ry,f){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;world.add(g);
+ mk(new THREE.PlaneGeometry(6.4,3.6),new THREE.MeshBasicMaterial({map:bTex(f)}),0,3.7,0,g,false);mk(new THREE.BoxGeometry(6.6,3.8,.12),ph('#2b2f2d'),0,3.7,-.08,g);
+ for(const sx of[-2.3,2.3])mk(new THREE.CylinderGeometry(.1,.12,2.2,8),ph('#2b2f2d'),sx,1.1,-.1,g);return g;}
+function fenceBanner(x,z,ry,f,w,ar,y){const h=w/ar,g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;world.add(g);
+ mk(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:bTex(f)}),0,y+h/2,0,g,false);mk(new THREE.BoxGeometry(w+.1,h+.1,.06),ph('#1f2422'),0,y+h/2,-.05,g);
+ for(const sx of[-w/2,w/2])mk(new THREE.CylinderGeometry(.05,.05,y+h,6),ph('#5b605d'),sx,(y+h)/2,-.08,g);return g;}
 function genObs(theme,w,h,r){const o=[],free=(x,z,rr)=>Math.abs(x)<w/2-1.3&&Math.abs(z)<h/2-1.3&&(x-(-w/2+1.6))**2+(z-(h/2-1.6))**2>20&&o.every(p=>(p[1]-x)**2+(p[2]-z)**2>(rr+(p[3]||.4)+1.4)**2);
  const place=(k,n,rr)=>{for(let i=0;i<n;i++)for(let t=0;t<40;t++){const x=(r()-.5)*w,z=(r()-.5)*h,ra=typeof rr==='function'?rr():rr;if(free(x,z,ra)){o.push([k,x,z,ra]);break;}}};
  const n=(a,b)=>a+Math.floor(r()*(b-a+1));
@@ -545,7 +556,7 @@ function loadWorld(job,home){
  else{const pm=lam('#d8cfba');for(const [a,b,c,d] of [[0,z0-m,fw,1.2],[0,z0+h+m,fw,1.2],[x0-m,0,1.2,fh],[x0+w+m,0,1.2,fh]])mk(new THREE.PlaneGeometry(c,d),pm,a,.02,b,null,false).rotation.x=-Math.PI/2;}
  if(home){const pz=z0+h+6;CAST.forEach(([f,n,r],i)=>{const a=(i-(CAST.length-1)/2)*.27,hx=Math.sin(a)*5.2,hz=pz-Math.cos(a)*3.6;const ch=spawnModel(f,world,hx,0,hz,-a*.6);
    ch.userData.ready.then(o=>{if(!o)return;const t=nameTag(n,r);t.position.set(0,2.05,0);ch.add(t);});});}
- if(home){const pad=mk(new THREE.CylinderGeometry(2.6,2.6,.08,40),lam('#cfd8d5'),0,.04,z0+h+6,null,false);pad.receiveShadow=true;mk(new THREE.CylinderGeometry(2.75,2.75,.05,40),lam(BRAND),0,.025,z0+h+6,null,false).receiveShadow=true;signBoard(3.6,z0+h+3.9).rotation.y=-.3;}
+ if(home){const pad=mk(new THREE.CylinderGeometry(2.6,2.6,.08,40),lam('#cfd8d5'),0,.04,z0+h+6,null,false);pad.receiveShadow=true;mk(new THREE.CylinderGeometry(2.75,2.75,.05,40),lam(BRAND),0,.025,z0+h+6,null,false).receiveShadow=true;signBoard(3.6,z0+h+3.9).rotation.y=-.3;photoBoard(9.2,z0+h-3.2,-.38,BANNER_AT.home);fenceBanner(0,z0-3.42,0,'skinny',3.8,3.42,2.95);}
  const th=job.theme;
  if(th==='yard'){building(0,z0-6.5,11,4.2,6,home?'#e3ece8':'#efe6d2',home?BRAND:'#7c3b2f');mk(new THREE.PlaneGeometry(70,2.4),lam('#d2cdc2'),0,.02,z0+h+3.2,null,false).rotation.x=-Math.PI/2;building(-17,z0-6,8,3.6,6,'#d8e4ec','#3d4a5a');building(17,z0-6,8,3.6,6,'#f1d9c4','#5a3d2f');}
  if(th==='farm'){building(-2,z0-8,10,5.5,7,'#b8352a','#3a2b24');mk(new THREE.CylinderGeometry(2,2,9,14),ph('#c9cdd0'),9,4.5,z0-8);mk(new THREE.SphereGeometry(2,14,8,0,6.3,0,1.6),ph('#9ea3a6'),9,9,z0-8);mk(new THREE.PlaneGeometry(4,80),lam('#a88a5c'),x0-6,.02,0,null,false).rotation.x=-Math.PI/2;}
@@ -596,9 +607,12 @@ function loadWorld(job,home){
   vanDriver=spawnModel('udc-driver',world,x0+w+1.2,0,z0+h+3.3,Math.PI);vanDriver.visible=false;
   footFig=person(BRAND,'#c2b08a',BRAND,'#8d5a3b');const sh=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,1.4,6),ph('#e5482d'));sh.position.set(.25,.75,.35);sh.rotation.x=.9;footFig.add(sh);footFig.visible=false;world.add(footFig);
   const picks=seasonPicks(job.season),bp=[picks[0],P[AM().belt[0]]];
-  [[x0-7.5,z0+h*.45,Math.PI/2],[x0+w+7.5,z0+h*.45,-Math.PI/2]].forEach(([bx,bz,ry],i)=>billboard(bx,bz,ry,bp[i]||picks[0]));
+  photoBoard(x0-7.5,z0+h*.45,Math.PI/2,BANNER_AT[job.theme]);billboard(x0+w+7.5,z0+h*.45,-Math.PI/2,bp[1]||picks[0]);
+ if(['farm','park','golf'].includes(job.theme))fenceBanner(0,z0-3.4,0,'skinny',6.4,3.42,.3);
+ if(job.theme==='estate')fenceBanner(0,z0-3.4,0,'strip-500x100',5,5,.3);
   if(job.theme==='stadium'){for(const sz of[-1,1])for(let k=0;k<4;k++)mk(new THREE.BoxGeometry(w+6,.9,1.6),ph(k%2?'#c9cdd0':'#a9aeb1'),0,.45+k*.9,(sz<0?z0-3-k*1.6:z0+h+9+k*1.6));
-   billboard(0,z0-11,0,null,true);}}
+   billboard(0,z0-11,0,null,true);
+  for(let i=0;i*4.2<w+4;i++){const bx=x0-2+2.1+i*4.2,f=i%2?'strip-500x100':'skinny',ar=i%2?5:3.42;fenceBanner(bx,z0-1.9,0,f,4,ar,.05);fenceBanner(bx,z0+h+1.9,Math.PI,f,4,ar,.05);}}}
 }
 const dmy=new THREE.Object3D();
 function setTuft(k,sy){dmy.position.set(tx[k],0,tz[k]);dmy.rotation.set(0,tr[k],0);dmy.scale.set(1.35,sy,1.35);dmy.updateMatrix();tufts.setMatrixAt(k,dmy.matrix);}
@@ -636,7 +650,7 @@ function renderPhone(){const ti=tierIx(),nt=TIERS[ti+1],se=SEASONS[sIx()];
   `<h3 style="margin-top:14px">Weekly challenge</h3><p class="small mut">Same lawn for everyone this week.${wb?' Your best: <b>'+wb+'</b>.':''} 5★ unlocks a promo code.</p>`+jobCard(wk,'data-weekly="1"','Play challenge')+
   `<h3 style="margin-top:14px">Practice</h3>`+jobCard(makeJob('yard',mkRng(SV.day*13+1),'practice'),'data-prac="1"','Mow your own yard')+
   `<div class="row"><button class="btn ghost sm" id="b-sleep">Skip to tomorrow</button><span class="small mut">New offers every day. Seasons change every 5 days.</span></div>`;}
- if(tab==='store'){const m=AM();B.innerHTML=`<div class="manual"><label for="pf"><b>Find my part</b></label><select id="pf"><option value="">Pick a mower…</option>${MOWERS.map(x=>`<option value="${x.id}" ${x.id===SV.pf?'selected':''}>${mname(x)}</option>`).join('')}</select>
+ if(tab==='store'){const m=AM();B.innerHTML=`<a class="adban" href="https://udcparts.com" target="_blank" rel="noopener"><img src="${BN}skinny.jpg" alt="UDC Parts mower parts" width="1280" height="374"></a><div class="manual"><label for="pf"><b>Find my part</b></label><select id="pf"><option value="">Pick a mower…</option>${MOWERS.map(x=>`<option value="${x.id}" ${x.id===SV.pf?'selected':''}>${mname(x)}</option>`).join('')}</select>
   ${SV.pf?`<div class="small" style="margin-top:6px">Belt <b>${MW_[SV.pf].belt.join(' / ')}</b> · blades <b>${MW_[SV.pf].blades.join(' / ')}</b></div>`:`<div class="small" style="margin-top:6px">Yours: ${mname(m)}, belt <b>${m.belt.join(' / ')}</b>, blades <b>${m.blades.join(' / ')}</b></div>`}</div>
   <div class="chips">${[['all','All'],['belt','Belts'],['blades','Blades'],['season',se.n+' picks'],['drinks','Cooler']].map(([k,l])=>`<button class="chip${storeF===k?' on':''}" data-sf="${k}">${l}</button>`).join('')}</div>`+
   (storeF==='drinks'?[]:PRODUCTS.map(p=>P[p[0]]).filter(p=>storeF==='all'||p.kind===storeF||(storeF==='season'&&seasonPick(p,sIx())))).map(p=>{const tr=trait(p.pn);return `<div class="item">${icon(p)}<span><b>${p.pn}</b><small>${p.name}</small><small>${p.spec}${tr.mulch?' · mulches leaves':''}${tr.hilift?' · high lift':''}${tr.aramid?' · lasts longer':''}</small><a href="${WM+p.id}" target="_blank" rel="noopener">Real part on Walmart →</a></span>
@@ -760,7 +774,7 @@ function finish(abandon){if(state!=='play'&&state!=='pause')return;state='result
  const words=['"I want my money back."','"Well... it is shorter, I guess."','"It will do."','"Nice work."','"Great job, I will tell my friends."','"Perfect. You are my lawn guy now."'];
  const used=(G.used.length?G.used:[m.belt[0],m.blades[0]]).map(pn=>partCard(P[pn],'link')).join('');
  const share=`My UDC Lawn Co. got ${s}★ from ${job.client} on Mow Pro by UDC Parts. udcparts.com`;
- $('#res').innerHTML=`<div class="brand"><span class="badge">UDC PARTS</span> Day ${job.practice||job.weekly?SV.day:SV.day-1} · ${job.label} · ${SEASONS[job.season].n}</div>
+ $('#res').innerHTML=`<a class="adban" href="https://udcparts.com" target="_blank" rel="noopener"><img src="${BN}strip-500x100.jpg" alt="UDC Parts — engineered to work, built to last" width="500" height="100"></a><div class="brand"><span class="badge">UDC PARTS</span> Day ${job.practice||job.weekly?SV.day:SV.day-1} · ${job.label} · ${SEASONS[job.season].n}</div>
  <h2>${abandon?'Job abandoned':job.tut||job.practice?'Your own yard':job.weekly?'Weekly challenge':job.client+' rates you'}</h2><div class="stars">${starTxt(s)}</div>
  <blockquote>${abandon?'"You just left? Unbelievable."':words[s]}${rivalMsg?'<br><span class="small">'+rivalMsg+'</span>':''}${wkMsg?'<br><span class="small">'+wkMsg+'</span>':''}</blockquote>
  <div class="stats">${lines.map(([a,b,ok])=>`<div class="stat"><span>${a}</span><b class="${ok?'ok':'no'}">${b}</b></div>`).join('')}
